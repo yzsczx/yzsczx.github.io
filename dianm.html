@@ -2,62 +2,106 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title七彩随机点名系统</title>
+    <title>星际随机点名系统</title>
     <style>
         body {
             margin: 0;
             height: 100vh;
-            background: #1a1a1a;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
             overflow: hidden;
             font-family: 'Microsoft YaHei', sans-serif;
         }
 
-        /* 班级选择按钮 */
+        /* 星空效果 */
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            animation: twinkle 200s linear infinite;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.8; }
+        }
+
+        /* 班级选择 */
         .class-selector {
             position: fixed;
             top: 20px;
             left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            z-index: 100;
         }
 
         .class-btn {
-            padding: 10px 20px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 25px;
+            display: block;
+            margin: 10px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            border-radius: 30px;
             cursor: pointer;
             transition: 0.3s;
         }
 
         .class-btn:hover {
-            background: #45a049;
-            transform: scale(1.05);
+            background: rgba(0,255,255,0.2);
+            box-shadow: 0 0 15px #00ffff;
         }
 
-        /* 七彩球容器 */
-        .ball-container {
+        /* 地球容器 */
+        .earth-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            perspective: 1000px;
         }
 
-        /* 七彩球样式 */
-        .magic-ball {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
+        /* 地球球体 */
+        .earth-sphere {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 30s linear infinite;
+        }
+
+        /* 姓名标签 */
+        .name-tag {
+            position: absolute;
+            width: 80px;
+            height: 80px;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            transform-style: preserve-3d;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* 结果展示框 */
+        .result-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: #ff4444;
+            display: none;
             justify-content: center;
             align-items: center;
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 24px;
             color: white;
-            animation: colorChange 5s infinite, rotate 8s linear infinite;
-            box-shadow: 0 0 50px rgba(255,255,255,0.2);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(255,68,68,0.5);
         }
 
         /* 控制按钮 */
@@ -67,6 +111,7 @@
             right: 30px;
             display: flex;
             gap: 15px;
+            z-index: 100;
         }
 
         .control-btn {
@@ -76,108 +121,147 @@
             cursor: pointer;
             font-size: 16px;
             transition: 0.3s;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        #startBtn { background: #2196F3; color: white; }
-        #stopBtn { background: #f44336; color: white; }
-        #resetBtn { background: #ff9800; color: white; }
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 15px white;
+        }
 
         /* 动画 */
         @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes colorChange {
-            0% { background: #ff0000; }
-            20% { background: #ff9900; }
-            40% { background: #ffff00; }
-            60% { background: #33cc33; }
-            80% { background: #3366ff; }
-            100% { background: #ff00ff; }
-        }
-
-        /* 停止时样式 */
-        .stopped {
-            animation-play-state: paused;
-            background: #ff0000 !important;
-            box-shadow: 0 0 50px rgba(255,0,0,0.5);
+            0% { transform: rotateY(0deg) rotateX(10deg); }
+            100% { transform: rotateY(360deg) rotateX(10deg); }
         }
     </style>
 </head>
 <body>
+    <!-- 星空背景 -->
+    <div class="stars"></div>
+
     <!-- 班级选择 -->
     <div class="class-selector">
-        <button class="class-btn" data-class="1">一年级一班</button>
-        <button class="class-btn" data-class="2">二年级三班</button>
-        <button class="class-btn" data-class="3">三年级二班</button>
-        <button class="class-btn" data-class="4">四年级四班</button>
+        <button class="class-btn" data-class="1">星辰一班</button>
+        <button class="class-btn" data-class="2">银河二班</button>
+        <button class="class-btn" data-class="3">宇宙三班</button>
+        <button class="class-btn" data-class="4">星际四班</button>
     </div>
 
-    <!-- 七彩球 -->
-    <div class="ball-container">
-        <div class="magic-ball" id="nameBall">点击开始</div>
+    <!-- 地球容器 -->
+    <div class="earth-container">
+        <div class="earth-sphere" id="earthSphere"></div>
     </div>
+
+    <!-- 结果展示 -->
+    <div class="result-box" id="resultBox"></div>
 
     <!-- 控制按钮 -->
     <div class="controls">
-        <button class="control-btn" id="startBtn">开始</button>
-        <button class="control-btn" id="stopBtn">停止</button>
+        <button class="control-btn" id="startBtn">启动</button>
+        <button class="control-btn" id="stopBtn">捕获</button>
         <button class="control-btn" id="resetBtn">重置</button>
     </div>
 
     <script>
         // 班级数据
-        const classes = {
-            1: ["张三", "李四", "王五", "赵六", "陈七"],
-            2: ["周杰伦", "林俊杰", "蔡依林", "孙燕姿", "梁静茹"],
-            3: ["诸葛亮", "刘备", "关羽", "张飞", "赵云"],
-            4: ["爱因斯坦", "牛顿", "居里夫人", "霍金", "特斯拉"]
+        const starClasses = {
+            1: ["北极星", "天狼星", "织女星", "大角星", "心宿二"],
+            2: ["黑洞", "中子星", "脉冲星", "类星体", "暗物质"],
+            3: ["月球", "火星", "木星", "土星", "天王星"],
+            4: ["银河", "星云", "星团", "超新星", "虫洞"]
         };
 
         let currentClass = [];
-        let intervalId = null;
-        const nameBall = document.getElementById('nameBall');
+        let animationId = null;
+        let currentName = "";
+        const earthSphere = document.getElementById('earthSphere');
+        const resultBox = document.getElementById('resultBox');
 
         // 初始化班级选择
         document.querySelectorAll('.class-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                currentClass = classes[btn.dataset.class];
-                nameBall.textContent = "班级已选择";
-                setTimeout(() => {
-                    nameBall.textContent = "点击开始";
-                }, 1000);
+                currentClass = starClasses[btn.dataset.class];
+                initEarthSphere();
             });
         });
 
-        // 开始按钮
+        // 初始化地球
+        function initEarthSphere() {
+            earthSphere.innerHTML = "";
+            resultBox.style.display = "none";
+            
+            currentClass.forEach(name => {
+                const angle = (Math.random() * 360);
+                const tag = document.createElement('div');
+                tag.className = "name-tag";
+                tag.textContent = name;
+                
+                // 3D定位计算
+                const transform = `
+                    rotateY(${angle}deg) 
+                    translateZ(200px) 
+                    rotateX(${Math.random() * 30 - 15}deg)
+                `;
+                
+                tag.style.transform = transform;
+                earthSphere.appendChild(tag);
+            });
+        }
+
+        // 开始动画
         document.getElementById('startBtn').addEventListener('click', () => {
             if (currentClass.length === 0) {
-                alert("请先选择班级！");
+                alert("请先选择星际班级！");
                 return;
             }
-            nameBall.classList.remove('stopped');
-            intervalId = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * currentClass.length);
-                nameBall.textContent = currentClass[randomIndex];
-            }, 50);
+            
+            earthSphere.style.animation = "rotate 30s linear infinite";
+            resultBox.style.display = "none";
+            animateNames();
         });
 
-        // 停止按钮
+        // 随机跳动动画
+        function animateNames() {
+            const tags = document.querySelectorAll('.name-tag');
+            tags.forEach(tag => {
+                tag.style.transform += `
+                    rotateZ(${Math.random() * 360}deg)
+                    scale(${0.8 + Math.random() * 0.4})
+                `;
+            });
+            
+            animationId = requestAnimationFrame(animateNames);
+        }
+
+        // 停止捕获
         document.getElementById('stopBtn').addEventListener('click', () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-                nameBall.classList.add('stopped');
-            }
+            if (currentClass.length === 0) return;
+            
+            cancelAnimationFrame(animationId);
+            earthSphere.style.animation = "none";
+            currentName = currentClass[Math.floor(Math.random() * currentClass.length)];
+            
+            resultBox.textContent = currentName;
+            resultBox.style.display = "flex";
+            resultBox.style.animation = "appear 0.5s";
         });
 
-        // 重置按钮
+        // 重置系统
         document.getElementById('resetBtn').addEventListener('click', () => {
-            clearInterval(intervalId);
+            cancelAnimationFrame(animationId);
             currentClass = [];
-            nameBall.textContent = "点击开始";
-            nameBall.classList.remove('stopped');
+            earthSphere.innerHTML = "";
+            resultBox.style.display = "none";
+            resultBox.textContent = "";
+            earthSphere.style.animation = "";
         });
+
+        // 初始化默认班级
+        currentClass = starClasses[1];
+        initEarthSphere();
     </script>
 </body>
 </html>
