@@ -2,280 +2,181 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>银河随机点名系统</title>
+    <title>量子随机点名系统</title>
     <style>
         body {
             margin: 0;
             height: 100vh;
-            background: radial-gradient(ellipse at bottom, #000428 0%, #020111 100%);
+            background: radial-gradient(circle at center, #000428 0%, #020111 100%);
             overflow: hidden;
             font-family: 'Microsoft YaHei', sans-serif;
         }
 
-        /* 星空效果 */
-        .stars {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .star {
+        /* 中央量子球 */
+        .quantum-core {
             position: absolute;
-            background: white;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, 
+                rgba(0,212,255,1) 0%,
+                rgba(9,9,121,1) 50%,
+                rgba(2,0,36,1) 100%);
             border-radius: 50%;
-            animation: twinkle 2s infinite;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 100px rgba(0,212,255,0.5);
+            animation: core-pulse 3s ease-in-out infinite;
         }
 
-        @keyframes twinkle {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* 班级选择 */
-        .class-selector {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .class-btn {
-            padding: 12px 24px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid #6dd5ed;
-            color: #6dd5ed;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
-        }
-
-        .class-btn:hover {
-            background: rgba(109,213,237,0.2);
-            box-shadow: 0 0 15px #6dd5ed;
-        }
-
-        /* 银河系容器 */
-        .galaxy {
+        /* 姓名轨道容器 */
+        .orbit-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 800px;
-            height: 800px;
-            animation: galaxyRotate 120s linear infinite;
-        }
-
-        /* 旋臂 */
-        .spiral-arm {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
         }
 
         /* 姓名粒子 */
         .name-particle {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 80px;
+            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 12px;
-            text-align: center;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border: 1px solid rgba(109,213,237,0.5);
-            transform-origin: center center;
-            transition: 0.5s;
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(0,212,255,0.8);
+            transform-origin: 150% 50%;
+            transition: all 0.5s ease;
         }
 
-        /* 结果框 */
-        .result-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            min-width: 200px;
-            padding: 30px 50px;
-            background: #ff4444;
-            color: white;
-            border-radius: 15px;
-            font-size: 28px;
-            text-align: center;
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 0 50px rgba(255,68,68,0.5);
-        }
-
-        .result-box.active {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* 控制按钮 */
-        .controls {
+        /* 控制面板 */
+        .control-panel {
             position: fixed;
             bottom: 30px;
-            right: 30px;
+            width: 100%;
             display: flex;
-            gap: 15px;
-            z-index: 100;
+            justify-content: center;
+            gap: 20px;
         }
 
         .control-btn {
-            padding: 15px 30px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
+            border-radius: 25px;
             background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid rgba(0,212,255,0.5);
         }
 
         .control-btn:hover {
-            background: rgba(255,255,255,0.2);
-            box-shadow: 0 0 15px white;
+            background: rgba(0,212,255,0.2);
+            box-shadow: 0 0 15px rgba(0,212,255,0.5);
         }
 
         /* 动画 */
-        @keyframes galaxyRotate {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        @keyframes core-pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes orbit-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- 动态星空 -->
-    <div class="stars"></div>
+    <div class="quantum-core"></div>
+    <div class="orbit-container" id="orbitContainer"></div>
 
-    <!-- 班级选择 -->
-    <div class="class-selector">
-        <button class="class-btn" data-class="1">星云一班</button>
-        <button class="class-btn" data-class="2">旋臂二班</button>
-        <button class="class-btn" data-class="3">星团三班</button>
-        <button class="class-btn" data-class="4">黑洞四班</button>
-    </div>
-
-    <!-- 银河系 -->
-    <div class="galaxy" id="galaxy"></div>
-
-    <!-- 结果展示 -->
-    <div class="result-box" id="resultBox"></div>
-
-    <!-- 控制按钮 -->
-    <div class="controls">
-        <button class="control-btn" id="startBtn">启动超旋</button>
-        <button class="control-btn" id="stopBtn">量子捕获</button>
-        <button class="control-btn" id="resetBtn">重置维度</button>
+    <div class="control-panel">
+        <button class="control-btn" id="importBtn">导入名单</button>
+        <button class="control-btn" id="startBtn">启动量子云</button>
+        <button class="control-btn" id="stopBtn">捕获粒子</button>
     </div>
 
     <script>
-        // 初始化星空
-        function createStars() {
-            const stars = document.querySelector('.stars');
-            for (let i = 0; i < 200; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.width = Math.random() * 3 + 'px';
-                star.style.height = star.style.width;
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 2 + 's';
-                stars.appendChild(star);
-            }
-        }
-        createStars();
+        let names = [];
+        let particles = [];
+        let isRunning = false;
+        let animationId;
 
-        // 班级数据
-        const galaxyClasses = {
-            1: ["星轨", "脉冲", "耀斑", "光年", "机关", "光和", "历史", "地理", "思维", "候鸟", "朗逸", "讨论", "地方", "规定", "广西", "河池", "宜州", "光是",
-            "根据", "给年", "人民", "测试", "自由", "如果", "威威", "王五","远景", "扎里", "不哭", "什么", "引力"],
-            2: ["暗物质", "曲速", "虫洞", "奇点", "量子"],
-            3: ["星云", "星团", "超新星", "红巨星", "白矮星"],
-            4: ["黑洞", "视界", "吸积盘", "喷流", "引力透镜"]
-        };
-
-        let currentClass = [];
-        let animationFrame;
-        const galaxy = document.getElementById('galaxy');
-        const resultBox = document.getElementById('resultBox');
-
-        // 初始化银河系
-        function initGalaxy(names) {
-            galaxy.innerHTML = '';
+        // 初始化粒子系统
+        function createParticles() {
+            const container = document.getElementById('orbitContainer');
+            container.innerHTML = '';
+            
             names.forEach((name, index) => {
                 const particle = document.createElement('div');
                 particle.className = 'name-particle';
-                
-                // 旋涡分布算法
-                const angle = (index * 2 * Math.PI) / names.length;
-                const radius = 300 + Math.random() * 100;
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-                
-                particle.style.transform = `
-                    translate(${x}px, ${y}px)
-                    rotate(${angle * 180/Math.PI}deg)
-                `;
                 particle.textContent = name;
-                galaxy.appendChild(particle);
+                
+                // 随机轨道参数
+                const speed = 0.5 + Math.random() * 2;
+                const radius = 180 + Math.random() * 50;
+                const angle = (Math.random() * 360);
+                
+                particle.style.setProperty('--speed', speed);
+                particle.style.setProperty('--radius', radius + 'px');
+                particle.style.transform = `rotate(${angle}deg) translateX(${radius}px)`;
+                
+                container.appendChild(particle);
+                particles.push({
+                    element: particle,
+                    speed: speed,
+                    radius: radius,
+                    angle: angle
+                });
             });
         }
 
-        // 班级选择
-        document.querySelectorAll('.class-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentClass = galaxyClasses[btn.dataset.class];
-                initGalaxy(currentClass);
+        // 运行动画
+        function animate() {
+            particles.forEach(particle => {
+                particle.angle += particle.speed;
+                particle.element.style.transform = 
+                    `rotate(${particle.angle}deg) translateX(${particle.radius}px)`;
             });
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // 按钮事件
+        document.getElementById('importBtn').addEventListener('click', () => {
+            names = prompt('请输入姓名（用逗号分隔）:').split(/,\s*/);
+            createParticles();
         });
 
-        // 启动动画
         document.getElementById('startBtn').addEventListener('click', () => {
-            if (!currentClass.length) return alert("请先选择星际班级！");
-            galaxy.style.animationPlayState = 'running';
+            if (!names.length) return alert('请先导入名单！');
+            isRunning = true;
+            animate();
         });
 
-        // 量子捕获
         document.getElementById('stopBtn').addEventListener('click', () => {
-            galaxy.style.animationPlayState = 'paused';
-            const result = currentClass[Math.floor(Math.random() * currentClass.length)];
-            resultBox.textContent = result;
-            resultBox.classList.add('active');
-            
-            // 粒子聚焦动画
-            document.querySelectorAll('.name-particle').forEach(particle => {
-                particle.style.transform = particle.style.transform.replace(/scale\([^)]+\)/, 'scale(0)');
-                if(particle.textContent === result) {
-                    particle.style.transform += ' scale(1.5)';
-                    particle.style.background = '#ff4444';
-                }
-            });
+            if (isRunning) {
+                cancelAnimationFrame(animationId);
+                isRunning = false;
+                
+                // 随机选中效果
+                const selectedIndex = Math.floor(Math.random() * particles.length);
+                particles.forEach((p, i) => {
+                    if (i === selectedIndex) {
+                        p.element.style.color = '#ff4444';
+                        p.element.style.fontSize = '18px';
+                        p.element.style.textShadow = '0 0 20px #ff4444';
+                    } else {
+                        p.element.style.opacity = '0.2';
+                    }
+                });
+            }
         });
-
-        // 重置维度
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            galaxy.style.animation = 'none';
-            resultBox.classList.remove('active');
-            setTimeout(() => {
-                galaxy.style.animation = 'galaxyRotate 120s linear infinite';
-                initGalaxy(currentClass);
-            }, 10);
-        });
-
-        // 默认初始化
-        currentClass = galaxyClasses[1];
-        initGalaxy(currentClass);
     </script>
 </body>
 </html>
