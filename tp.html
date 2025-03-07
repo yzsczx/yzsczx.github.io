@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>课堂投票 - 维权方式</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    h1 {
+      color: #333;
+      margin-top: 20px;
+    }
+    .container {
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .results {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .results div {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>课堂投票：维权方式</h1>
+  <div class="container">
+    <p>如果遇到权益受损，你更倾向于选择哪种维权方式？</p>
+    <button onclick="vote('协商解决')">协商解决</button>
+    <button onclick="vote('调解')">调解</button>
+    <button onclick="vote('仲裁')">仲裁</button>
+    <button onclick="vote('诉讼')">诉讼</button>
+
+    <div class="results">
+      <h2>投票结果：</h2>
+      <div id="协商解决">协商解决：0 票</div>
+      <div id="调解">调解：0 票</div>
+      <div id="仲裁">仲裁：0 票</div>
+      <div id="诉讼">诉讼：0 票</div>
+    </div>
+  </div>
+
+  <script>
+    // 初始化投票数据
+    const votes = {
+      "协商解决": 0,
+      "调解": 0,
+      "仲裁": 0,
+      "诉讼": 0
+    };
+
+    // 投票函数
+    function vote(option) {
+      votes[option]++;
+      updateResults();
+    }
+
+    // 更新结果显示
+    function updateResults() {
+      for (let option in votes) {
+        document.getElementById(option).textContent = `${option}：${votes[option]} 票`;
+      }
+    }
+  </script>
+</body>
+</html>
