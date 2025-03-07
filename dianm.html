@@ -2,204 +2,182 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机点名系统</title>
+    <title七彩随机点名系统</title>
     <style>
         body {
+            margin: 0;
+            height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
             font-family: 'Microsoft YaHei', sans-serif;
+        }
+
+        /* 班级选择按钮 */
+        .class-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            padding: 20px;
+            gap: 10px;
         }
 
-        .container {
-            width: 90%;
-            max-width: 800px;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-top: 30px;
-        }
-
-        .upload-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .custom-upload {
+        .class-btn {
+            padding: 10px 20px;
             background: #4CAF50;
             color: white;
-            padding: 12px 25px;
+            border: none;
             border-radius: 25px;
             cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            font-size: 16px;
+            transition: 0.3s;
         }
 
-        .custom-upload:hover {
+        .class-btn:hover {
             background: #45a049;
-            transform: translateY(-2px);
+            transform: scale(1.05);
         }
 
-        .display-area {
-            height: 200px;
-            background: #f8f9fa;
-            border-radius: 15px;
+        /* 七彩球容器 */
+        .ball-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 七彩球样式 */
+        .magic-ball {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3em;
-            margin: 20px 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .controls {
-            text-align: center;
-        }
-
-        button {
-            background: #2196F3;
+            font-size: 32px;
+            font-weight: bold;
             color: white;
+            animation: colorChange 5s infinite, rotate 8s linear infinite;
+            box-shadow: 0 0 50px rgba(255,255,255,0.2);
+        }
+
+        /* 控制按钮 */
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
             border: none;
-            padding: 15px 40px;
             border-radius: 30px;
-            font-size: 18px;
             cursor: pointer;
-            transition: all 0.3s;
-            margin: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 16px;
+            transition: 0.3s;
         }
 
-        button:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
+        #startBtn { background: #2196F3; color: white; }
+        #stopBtn { background: #f44336; color: white; }
+        #resetBtn { background: #ff9800; color: white; }
+
+        /* 动画 */
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .remaining {
-            text-align: center;
-            color: #666;
-            margin-top: 20px;
+        @keyframes colorChange {
+            0% { background: #ff0000; }
+            20% { background: #ff9900; }
+            40% { background: #ffff00; }
+            60% { background: #33cc33; }
+            80% { background: #3366ff; }
+            100% { background: #ff00ff; }
         }
 
-        @keyframes glow {
-            0% { box-shadow: 0 0 10px rgba(33,150,243,0.4); }
-            50% { box-shadow: 0 0 20px rgba(33,150,243,0.6); }
-            100% { box-shadow: 0 0 10px rgba(33,150,243,0.4); }
-        }
-
-        .highlight {
-            animation: glow 1.5s infinite;
+        /* 停止时样式 */
+        .stopped {
+            animation-play-state: paused;
+            background: #ff0000 !important;
+            box-shadow: 0 0 50px rgba(255,0,0,0.5);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 style="text-align: center; color: #333;">随机点名系统</h1>
-        
-        <div class="upload-section">
-            <input type="file" id="fileInput" accept=".txt">
-            <label for="fileInput" class="custom-upload">
-                📄 导入名单文件 (.txt)
-            </label>
-        </div>
+    <!-- 班级选择 -->
+    <div class="class-selector">
+        <button class="class-btn" data-class="1">一年级一班</button>
+        <button class="class-btn" data-class="2">二年级三班</button>
+        <button class="class-btn" data-class="3">三年级二班</button>
+        <button class="class-btn" data-class="4">四年级四班</button>
+    </div>
 
-        <div class="display-area" id="display">
-            <div id="nameDisplay">准备就绪</div>
-        </div>
+    <!-- 七彩球 -->
+    <div class="ball-container">
+        <div class="magic-ball" id="nameBall">点击开始</div>
+    </div>
 
-        <div class="controls">
-            <button id="startBtn" onclick="startRoll()">🎲 开始点名</button>
-            <button id="resetBtn" onclick="resetList()" style="background: #ff9800;">🔄 重置名单</button>
-        </div>
-
-        <div class="remaining">
-            剩余人数：<span id="remainingCount">0</span>
-        </div>
+    <!-- 控制按钮 -->
+    <div class="controls">
+        <button class="control-btn" id="startBtn">开始</button>
+        <button class="control-btn" id="stopBtn">停止</button>
+        <button class="control-btn" id="resetBtn">重置</button>
     </div>
 
     <script>
-        let candidates = [];
-        let originalList = [];
-        let isRolling = false;
-        let rollInterval;
+        // 班级数据
+        const classes = {
+            1: ["张三", "李四", "王五", "赵六", "陈七"],
+            2: ["周杰伦", "林俊杰", "蔡依林", "孙燕姿", "梁静茹"],
+            3: ["诸葛亮", "刘备", "关羽", "张飞", "赵云"],
+            4: ["爱因斯坦", "牛顿", "居里夫人", "霍金", "特斯拉"]
+        };
 
-        // 文件读取
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    candidates = e.target.result.split('\n')
-                        .map(name => name.trim())
-                        .filter(name => name.length > 0);
-                    originalList = [...candidates];
-                    updateRemaining();
-                    document.getElementById('nameDisplay').textContent = "准备就绪";
-                };
-                reader.readAsText(file);
+        let currentClass = [];
+        let intervalId = null;
+        const nameBall = document.getElementById('nameBall');
+
+        // 初始化班级选择
+        document.querySelectorAll('.class-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentClass = classes[btn.dataset.class];
+                nameBall.textContent = "班级已选择";
+                setTimeout(() => {
+                    nameBall.textContent = "点击开始";
+                }, 1000);
+            });
+        });
+
+        // 开始按钮
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (currentClass.length === 0) {
+                alert("请先选择班级！");
+                return;
+            }
+            nameBall.classList.remove('stopped');
+            intervalId = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * currentClass.length);
+                nameBall.textContent = currentClass[randomIndex];
+            }, 50);
+        });
+
+        // 停止按钮
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+                nameBall.classList.add('stopped');
             }
         });
 
-        // 开始随机点名
-        function startRoll() {
-            if (candidates.length === 0) {
-                alert("请先导入名单！");
-                return;
-            }
-
-            const startBtn = document.getElementById('startBtn');
-            if (!isRolling) {
-                isRolling = true;
-                startBtn.textContent = "⏹ 停止点名";
-                startBtn.style.background = "#f44336";
-                
-                rollInterval = setInterval(() => {
-                    const randomIndex = Math.floor(Math.random() * candidates.length);
-                    document.getElementById('nameDisplay').textContent = candidates[randomIndex];
-                }, 50);
-                
-                document.getElementById('display').classList.add('highlight');
-            } else {
-                isRolling = false;
-                startBtn.textContent = "🎲 开始点名";
-                startBtn.style.background = "#2196F3";
-                clearInterval(rollInterval);
-                
-                // 移除选中项
-                const selectedName = document.getElementById('nameDisplay').textContent;
-                candidates = candidates.filter(name => name !== selectedName);
-                updateRemaining();
-                
-                document.getElementById('display').classList.remove('highlight');
-            }
-        }
-
-        // 重置名单
-        function resetList() {
-            candidates = [...originalList];
-            updateRemaining();
-            document.getElementById('nameDisplay').textContent = "名单已重置";
-            setTimeout(() => {
-                document.getElementById('nameDisplay').textContent = "准备就绪";
-            }, 1500);
-        }
-
-        // 更新剩余人数
-        function updateRemaining() {
-            document.getElementById('remainingCount').textContent = candidates.length;
-        }
+        // 重置按钮
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            clearInterval(intervalId);
+            currentClass = [];
+            nameBall.textContent = "点击开始";
+            nameBall.classList.remove('stopped');
+        });
     </script>
 </body>
 </html>
