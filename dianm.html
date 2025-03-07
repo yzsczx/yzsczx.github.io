@@ -1,159 +1,364 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <title>星空随机点名系统</title>
+    <meta charset="UTF-8">
+    <title>极速星空点名系统</title>
     <style>
+        :root {
+            --main-color: #ff4757;
+            --bg-color: #0a0432;
+        }
+
         body {
             margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             overflow: hidden;
-            background: #000;
-            color: #fff;
-            font-family: 'Arial', sans-serif;
-        }
-        #stars {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
-        .container {
             position: relative;
+        }
+
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .class-selector {
+            margin: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             z-index: 1;
-            text-align: center;
-            padding-top: 100px;
         }
-        select {
+
+        .class-btn {
             padding: 10px 20px;
-            font-size: 18px;
-            margin-bottom: 30px;
-            border: 2px solid #fff;
-            border-radius: 5px;
-            background: transparent;
-            color: #fff;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid var(--main-color);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
         }
-        #display {
-            font-size: 48px;
-            margin: 40px 0;
-            text-shadow: 0 0 20px #fff;
-            min-height: 80px;
+
+        .class-btn.active {
+            background: var(--main-color);
+            box-shadow: 0 0 15px var(--main-color);
         }
-        button {
-            padding: 15px 40px;
+
+        .lottery-container {
+            position: relative;
+            width: 80%;
+            height: 150px;
+            margin: auto;
+            overflow: hidden;
+            border: 3px solid var(--main-color);
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1;
+        }
+
+        .name-scroller {
+            display: flex;
+            position: absolute;
+            left: 0;
+            height: 100%;
+            transition: transform 0.1s linear;
+        }
+
+        .name-item {
+            min-width: 200px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 24px;
+            color: white;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+
+        .selection-marker {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            border: 3px solid var(--main-color);
+            transform: translateX(-50%);
+            box-shadow: 0 0 30px var(--main-color);
+            z-index: 2;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .control-btn {
+            padding: 12px 30px;
+            background: var(--main-color);
             border: none;
             border-radius: 25px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             color: white;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        button:hover {
-            transform: scale(1.1);
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px var(--main-color); }
+            50% { text-shadow: 0 0 20px var(--main-color); }
+            100% { text-shadow: 0 0 10px var(--main-color); }
         }
     </style>
 </head>
 <body>
-    <canvas id="stars"></canvas>
-    <div class="container">
-        <select id="classSelect">
-            <option value="0">请选择班级</option>
-            <option value="1">高一（1）班</option>
-            <option value="2">高一（2）班</option>
-            <option value="3">高二（1）班</option>
-            <option value="4">高二（2）班</option>
-        </select>
-        <div id="display">请选择班级开始点名</div>
-        <button onclick="toggleRoll()">开始点名</button>
+    <canvas id="starCanvas"></canvas>
+
+    <div class="class-selector">
+        <button class="class-btn active" data-class="1">一年级</button>
+        <button class="class-btn" data-class="2">二年级</button>
+        <button class="class-btn" data-class="3">三年级</button>
+        <button class="class-btn" data-class="4">四年级</button>
     </div>
 
-<script>
-// 星空背景生成
-const canvas = document.getElementById('stars');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    <div class="lottery-container">
+        <div class="selection-marker"></div>
+        <div class="name-scroller" id="scroller"></div>
+    </div>
 
-class Star {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2;
-        this.speed = Math.random() * 0.5 + 0.1;
-    }
+    <div class="controls">
+        <button class="control-btn" id="startBtn">开始</button>
+        <button class="control-btn" id="stopBtn" disabled>停止</button>
+        <button class="control-btn" id="resetBtn">重置</button>
+    </div>
 
-    draw() {
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
+    <script>
+        // 星空背景系统
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let meteors = [];
 
-    update() {
-        this.x += this.speed;
-        if (this.x > canvas.width) this.x = 0;
-        this.draw();
-    }
-}
+        class Star {
+            constructor() {
+                this.reset();
+                this.baseAlpha = this.alpha;
+            }
 
-let stars = [];
-for(let i=0; i<200; i++) {
-    stars.push(new Star());
-}
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.radius = Math.random() * 1.5;
+                this.baseAlpha = Math.random() * 0.5 + 0.2;
+                this.alpha = this.baseAlpha;
+                this.speed = Math.random() * 0.01;
+                this.phase = Math.random() * Math.PI * 2;
+            }
 
-function animate() {
-    ctx.fillStyle = 'rgba(0,0,0,0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    stars.forEach(star => star.update());
-    requestAnimationFrame(animate);
-}
-animate();
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.fill();
+            }
 
-// 班级数据
-const classes = {
-    1: ["张三", "李四", "王五", "赵六", "陈七", "周八", "吴九", "郑十"],
-    2: ["孙十一", "胡十二", "朱十三", "林十四", "何十五", "高十六", "梁十七", "谢十八"],
-    3: ["宋十九", "唐二十", "许廿一", "邓廿二", "韩廿三", "冯廿四", "曹廿五", "彭廿六"],
-    4: ["曾廿七", "肖廿八", "田廿九", "董三十", "袁卅一", "潘卅二", "于卅三", "蒋卅四"]
-};
+            update() {
+                this.phase += this.speed;
+                this.alpha = this.baseAlpha * (Math.sin(this.phase) + 1) / 2;
+            }
+        }
 
-let currentClass = 0;
-let interval;
-let rolling = false;
+        class Meteor {
+            constructor() {
+                this.reset();
+            }
 
-// 点名逻辑
-function toggleRoll() {
-    const display = document.getElementById('display');
-    const selected = parseInt(document.getElementById('classSelect').value);
-    
-    if (selected === 0) {
-        alert('请先选择班级！');
-        return;
-    }
-    
-    if (!rolling) {
-        rolling = true;
-        const names = classes[selected];
-        interval = setInterval(() => {
-            const random = Math.floor(Math.random() * names.length);
-            display.textContent = names[random];
-        }, 50);
-    } else {
-        clearInterval(interval);
-        rolling = false;
-    }
-}
+            reset() {
+                this.x = Math.random() < 0.5 ? -100 : canvas.width + 100;
+                this.y = Math.random() * canvas.height;
+                this.angle = Math.atan2(
+                    Math.random() * canvas.height - this.y,
+                    Math.random() * canvas.width - this.x
+                );
+                this.speed = 3 + Math.random() * 3;
+                this.length = 30 + Math.random() * 50;
+                this.alpha = 1;
+            }
 
-// 窗口大小变化处理
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
-</script>
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(
+                    this.x - Math.cos(this.angle) * this.length,
+                    this.y - Math.sin(this.angle) * this.length
+                );
+                ctx.strokeStyle = `rgba(255, ${150 + Math.random()*100}, ${Math.random()*100}, ${this.alpha})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.alpha -= 0.005;
+                
+                if (this.alpha <= 0 || 
+                    this.x < -100 || 
+                    this.x > canvas.width + 100 || 
+                    this.y < -100 || 
+                    this.y > canvas.height + 100) {
+                    this.reset();
+                }
+            }
+        }
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = Array(200).fill().map(() => new Star());
+            meteors = Array(3).fill().map(() => new Meteor());
+        }
+
+        function animateStars() {
+            ctx.fillStyle = 'rgba(10, 4, 50, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            
+            meteors.forEach(meteor => {
+                meteor.update();
+                meteor.draw();
+            });
+            
+            requestAnimationFrame(animateStars);
+        }
+
+        // 随机点名系统
+        const classes = {
+            1: ["张三", "李四", "王五", "赵六", "陈七"],
+            2: ["周杰伦", "林俊杰", "蔡依林", "孙燕姿", "梁静茹"],
+            3: ["诸葛亮", "刘备", "关羽", "张飞", "赵云"],
+            4: ["爱因斯坦", "牛顿", "居里夫人", "霍金", "特斯拉"]
+        };
+
+        let currentClass = [];
+        let isRunning = false;
+        let currentSpeed = 30;
+        const maxSpeed = 120;
+        const scroller = document.getElementById('scroller');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        function initScroller(names) {
+            scroller.innerHTML = names.map(name => `
+                <div class="name-item">${name}</div>
+            `).join('');
+        }
+
+        function startRoll() {
+            if (currentClass.length === 0) return;
+            
+            isRunning = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            let position = 0;
+            
+            function animate() {
+                if (!isRunning) return;
+                
+                currentSpeed = Math.min(currentSpeed * 1.05, maxSpeed);
+                position += currentSpeed;
+                
+                if (position > scroller.scrollWidth) {
+                    position = position % scroller.scrollWidth;
+                }
+                
+                scroller.style.transform = `translateX(-${position}px)`;
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function stopRoll() {
+            isRunning = false;
+            currentSpeed = 30;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            const containerWidth = document.querySelector('.lottery-container').offsetWidth;
+            const selectedIndex = Math.floor(Math.random() * currentClass.length);
+            const targetPosition = selectedIndex * 200 - containerWidth/2 + 100;
+            
+            scroller.style.transition = 'transform 2s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            scroller.style.transform = `translateX(-${targetPosition}px)`;
+            
+            setTimeout(() => {
+                const items = document.querySelectorAll('.name-item');
+                items.forEach((item, index) => {
+                    if (index === selectedIndex) {
+                        item.style.color = '#ff4757';
+                        item.style.fontWeight = 'bold';
+                        item.style.transform = 'scale(1.2)';
+                        item.style.animation = 'glow 1s infinite';
+                    }
+                });
+            }, 2000);
+        }
+
+        function resetSystem() {
+            isRunning = false;
+            scroller.style.transition = 'none';
+            scroller.style.transform = 'translateX(0)';
+            document.querySelectorAll('.name-item').forEach(item => {
+                item.style.color = 'white';
+                item.style.fontWeight = 'normal';
+                item.style.transform = 'none';
+                item.style.animation = '';
+            });
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        // 事件监听
+        document.querySelectorAll('.class-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentClass = [...classes[this.dataset.class]];
+                initScroller(currentClass);
+                resetSystem();
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startRoll);
+        document.getElementById('stopBtn').addEventListener('click', stopRoll);
+        document.getElementById('resetBtn').addEventListener('click', resetSystem);
+
+        // 初始化
+        window.addEventListener('resize', initStars);
+        initStars();
+        animateStars();
+        currentClass = [...classes[1]];
+        initScroller(currentClass);
+    </script>
 </body>
 </html>
