@@ -2,12 +2,12 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>星际随机点名系统</title>
+    <title>银河随机点名系统</title>
     <style>
         body {
             margin: 0;
             height: 100vh;
-            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            background: radial-gradient(ellipse at bottom, #000428 0%, #020111 100%);
             overflow: hidden;
             font-family: 'Microsoft YaHei', sans-serif;
         }
@@ -17,13 +17,20 @@
             position: fixed;
             width: 100%;
             height: 100%;
-            animation: twinkle 200s linear infinite;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
         }
 
         @keyframes twinkle {
-            0% { opacity: 0.8; }
-            50% { opacity: 0.5; }
-            100% { opacity: 0.8; }
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         /* 班级选择 */
@@ -32,76 +39,85 @@
             top: 20px;
             left: 20px;
             z-index: 100;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .class-btn {
-            display: block;
-            margin: 10px;
             padding: 12px 24px;
             background: rgba(255,255,255,0.1);
-            border: 1px solid #00ffff;
-            color: #00ffff;
+            border: 1px solid #6dd5ed;
+            color: #6dd5ed;
             border-radius: 30px;
             cursor: pointer;
             transition: 0.3s;
+            backdrop-filter: blur(5px);
         }
 
         .class-btn:hover {
-            background: rgba(0,255,255,0.2);
-            box-shadow: 0 0 15px #00ffff;
+            background: rgba(109,213,237,0.2);
+            box-shadow: 0 0 15px #6dd5ed;
         }
 
-        /* 地球容器 */
-        .earth-container {
+        /* 银河系容器 */
+        .galaxy {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            perspective: 1000px;
+            width: 800px;
+            height: 800px;
+            animation: galaxyRotate 120s linear infinite;
         }
 
-        /* 地球球体 */
-        .earth-sphere {
-            width: 400px;
-            height: 400px;
-            position: relative;
-            transform-style: preserve-3d;
-            animation: rotate 30s linear infinite;
-        }
-
-        /* 姓名标签 */
-        .name-tag {
+        /* 旋臂 */
+        .spiral-arm {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        /* 姓名粒子 */
+        .name-particle {
+            position: absolute;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 14px;
+            font-size: 12px;
             text-align: center;
-            transform-style: preserve-3d;
             background: rgba(255,255,255,0.1);
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(109,213,237,0.5);
+            transform-origin: center center;
+            transition: 0.5s;
         }
 
-        /* 结果展示框 */
+        /* 结果框 */
         .result-box {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
+            transform: translate(-50%, -50%) scale(0);
+            min-width: 200px;
+            padding: 30px 50px;
             background: #ff4444;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
             color: white;
-            border-radius: 20px;
+            border-radius: 15px;
+            font-size: 28px;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             box-shadow: 0 0 50px rgba(255,68,68,0.5);
+        }
+
+        .result-box.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
 
         /* 控制按钮 */
@@ -132,136 +148,133 @@
         }
 
         /* 动画 */
-        @keyframes rotate {
-            0% { transform: rotateY(0deg) rotateX(10deg); }
-            100% { transform: rotateY(360deg) rotateX(10deg); }
+        @keyframes galaxyRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- 星空背景 -->
+    <!-- 动态星空 -->
     <div class="stars"></div>
 
     <!-- 班级选择 -->
     <div class="class-selector">
-        <button class="class-btn" data-class="1">星辰一班</button>
-        <button class="class-btn" data-class="2">银河二班</button>
-        <button class="class-btn" data-class="3">宇宙三班</button>
-        <button class="class-btn" data-class="4">星际四班</button>
+        <button class="class-btn" data-class="1">星云一班</button>
+        <button class="class-btn" data-class="2">旋臂二班</button>
+        <button class="class-btn" data-class="3">星团三班</button>
+        <button class="class-btn" data-class="4">黑洞四班</button>
     </div>
 
-    <!-- 地球容器 -->
-    <div class="earth-container">
-        <div class="earth-sphere" id="earthSphere"></div>
-    </div>
+    <!-- 银河系 -->
+    <div class="galaxy" id="galaxy"></div>
 
     <!-- 结果展示 -->
     <div class="result-box" id="resultBox"></div>
 
     <!-- 控制按钮 -->
     <div class="controls">
-        <button class="control-btn" id="startBtn">启动</button>
-        <button class="control-btn" id="stopBtn">捕获</button>
-        <button class="control-btn" id="resetBtn">重置</button>
+        <button class="control-btn" id="startBtn">启动超旋</button>
+        <button class="control-btn" id="stopBtn">量子捕获</button>
+        <button class="control-btn" id="resetBtn">重置维度</button>
     </div>
 
     <script>
+        // 初始化星空
+        function createStars() {
+            const stars = document.querySelector('.stars');
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                stars.appendChild(star);
+            }
+        }
+        createStars();
+
         // 班级数据
-        const starClasses = {
-            1: ["北极星", "天狼星", "织女星", "大角星", "心宿二"],
-            2: ["黑洞", "中子星", "脉冲星", "类星体", "暗物质"],
-            3: ["月球", "火星", "木星", "土星", "天王星"],
-            4: ["银河", "星云", "星团", "超新星", "虫洞"]
+        const galaxyClasses = {
+            1: ["星轨", "脉冲", "耀斑", "光年", "引力"],
+            2: ["暗物质", "曲速", "虫洞", "奇点", "量子"],
+            3: ["星云", "星团", "超新星", "红巨星", "白矮星"],
+            4: ["黑洞", "视界", "吸积盘", "喷流", "引力透镜"]
         };
 
         let currentClass = [];
-        let animationId = null;
-        let currentName = "";
-        const earthSphere = document.getElementById('earthSphere');
+        let animationFrame;
+        const galaxy = document.getElementById('galaxy');
         const resultBox = document.getElementById('resultBox');
 
-        // 初始化班级选择
+        // 初始化银河系
+        function initGalaxy(names) {
+            galaxy.innerHTML = '';
+            names.forEach((name, index) => {
+                const particle = document.createElement('div');
+                particle.className = 'name-particle';
+                
+                // 旋涡分布算法
+                const angle = (index * 2 * Math.PI) / names.length;
+                const radius = 300 + Math.random() * 100;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                particle.style.transform = `
+                    translate(${x}px, ${y}px)
+                    rotate(${angle * 180/Math.PI}deg)
+                `;
+                particle.textContent = name;
+                galaxy.appendChild(particle);
+            });
+        }
+
+        // 班级选择
         document.querySelectorAll('.class-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                currentClass = starClasses[btn.dataset.class];
-                initEarthSphere();
+                currentClass = galaxyClasses[btn.dataset.class];
+                initGalaxy(currentClass);
             });
         });
 
-        // 初始化地球
-        function initEarthSphere() {
-            earthSphere.innerHTML = "";
-            resultBox.style.display = "none";
-            
-            currentClass.forEach(name => {
-                const angle = (Math.random() * 360);
-                const tag = document.createElement('div');
-                tag.className = "name-tag";
-                tag.textContent = name;
-                
-                // 3D定位计算
-                const transform = `
-                    rotateY(${angle}deg) 
-                    translateZ(200px) 
-                    rotateX(${Math.random() * 30 - 15}deg)
-                `;
-                
-                tag.style.transform = transform;
-                earthSphere.appendChild(tag);
-            });
-        }
-
-        // 开始动画
+        // 启动动画
         document.getElementById('startBtn').addEventListener('click', () => {
-            if (currentClass.length === 0) {
-                alert("请先选择星际班级！");
-                return;
-            }
-            
-            earthSphere.style.animation = "rotate 30s linear infinite";
-            resultBox.style.display = "none";
-            animateNames();
+            if (!currentClass.length) return alert("请先选择星际班级！");
+            galaxy.style.animationPlayState = 'running';
         });
 
-        // 随机跳动动画
-        function animateNames() {
-            const tags = document.querySelectorAll('.name-tag');
-            tags.forEach(tag => {
-                tag.style.transform += `
-                    rotateZ(${Math.random() * 360}deg)
-                    scale(${0.8 + Math.random() * 0.4})
-                `;
-            });
-            
-            animationId = requestAnimationFrame(animateNames);
-        }
-
-        // 停止捕获
+        // 量子捕获
         document.getElementById('stopBtn').addEventListener('click', () => {
-            if (currentClass.length === 0) return;
+            galaxy.style.animationPlayState = 'paused';
+            const result = currentClass[Math.floor(Math.random() * currentClass.length)];
+            resultBox.textContent = result;
+            resultBox.classList.add('active');
             
-            cancelAnimationFrame(animationId);
-            earthSphere.style.animation = "none";
-            currentName = currentClass[Math.floor(Math.random() * currentClass.length)];
-            
-            resultBox.textContent = currentName;
-            resultBox.style.display = "flex";
-            resultBox.style.animation = "appear 0.5s";
+            // 粒子聚焦动画
+            document.querySelectorAll('.name-particle').forEach(particle => {
+                particle.style.transform = particle.style.transform.replace(/scale\([^)]+\)/, 'scale(0)');
+                if(particle.textContent === result) {
+                    particle.style.transform += ' scale(1.5)';
+                    particle.style.background = '#ff4444';
+                }
+            });
         });
 
-        // 重置系统
+        // 重置维度
         document.getElementById('resetBtn').addEventListener('click', () => {
-            cancelAnimationFrame(animationId);
-            currentClass = [];
-            earthSphere.innerHTML = "";
-            resultBox.style.display = "none";
-            resultBox.textContent = "";
-            earthSphere.style.animation = "";
+            galaxy.style.animation = 'none';
+            resultBox.classList.remove('active');
+            setTimeout(() => {
+                galaxy.style.animation = 'galaxyRotate 120s linear infinite';
+                initGalaxy(currentClass);
+            }, 10);
         });
 
-        // 初始化默认班级
-        currentClass = starClasses[1];
-        initEarthSphere();
+        // 默认初始化
+        currentClass = galaxyClasses[1];
+        initGalaxy(currentClass);
     </script>
 </body>
 </html>
