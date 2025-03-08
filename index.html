@@ -1,7 +1,198 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清风徐来 | 技术博客</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
+    
+    <!-- 自定义样式 -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --text-color: #34495e;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            color: var(--text-color);
+            line-height: 1.8;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 4rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .post-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 12px;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .post-tag {
+            background: var(--accent-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .sidebar-widget {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
 <body>
-<h1>Hello World</h1>
-<p><a href="https://yzsczx.github.io/dianm.html">点名</a></p>
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">清风徐来</a>
+        <button class="navbar-toggler" type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://yzsczx.github.io/tp.html">投票</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://yzsczx.github.io/ps.html">图片修改</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://yzsczx.github.io/dianm.html">随机点名</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 首屏内容 -->
+<main class="container mt-5 pt-5">
+    <div class="hero-section">
+        <div class="container text-center">
+            <img src="avatar.jpg" 
+                 alt="作者头像" 
+                 class="rounded-circle mb-3" 
+                 style="width: 120px; height: 120px; object-fit: cover;">
+            <h1 class="display-5 fw-bold mb-3">技术探索与生活随笔</h1>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#" class="social-icon">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="#" class="social-icon">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="social-icon">
+                    <i class="fab fa-rss"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="row g-4 mt-4">
+        <!-- 文章列表 -->
+        <div class="col-lg-8">
+            <article class="post-card card mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="post-tag me-2">前端开发</span>
+                        <small class="text-muted">2023年8月15日</small>
+                    </div>
+                    <h2 class="h4 mb-3">深入理解现代CSS布局</h2>
+                    <p class="card-text">从Flexbox到Grid，系统解析现代布局解决方案...<a href="#" class="text-decoration-none">阅读更多</a></p>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-secondary">CSS</span>
+                        <span class="badge bg-secondary">布局</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 更多文章... -->
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="col-lg-4">
+            <div class="sidebar-widget">
+                <h4 class="h5 mb-3">关于作者</h4>
+                <p>全栈开发者，热爱技术写作与开源分享，专注Web开发领域</p>
+            </div>
+
+            <div class="sidebar-widget">
+                <h4 class="h5 mb-3">分类目录</h4>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        前端开发
+                        <span class="badge bg-primary rounded-pill">12</span>
+                    </a>
+                    <!-- 更多分类... -->
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- 页脚 -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">&copy; 2023 清风徐来 保留所有权利</p>
+        <p class="text-muted mt-2">由Bootstrap 5强力驱动</p>
+    </div>
+</footer>
+
+<!-- 脚本文件 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kit.fontawesome.com/your-kit-code.js"></script>
 </body>
 </html>
