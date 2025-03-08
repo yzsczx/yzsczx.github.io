@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片处理工具</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .preview-box {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 200px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .custom-upload {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        img.preview {
+            max-width: 100%;
+            max-height: 400px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>图片处理工具</h1>
+        
+        <div class="preview-box">
+            <input type="file" id="fileInput" accept="image/*">
+            <label for="fileInput" class="custom-upload">选择图片</label>
+            <div id="previewContainer"></div>
+        </div>
+
+        <div class="controls">
+            <div>
+                <label>宽度：</label>
+                <input type="number" id="width" placeholder="自动" min="1">
+            </div>
+            <div>
+                <label>高度：</label>
+                <input type="number" id="height" placeholder="自动" min="1">
+            </div>
+            <div>
+                <label>输出格式：</label>
+                <select id="format">
+                    <option value="png">PNG</option>
+                    <option value="jpeg">JPEG</option>
+                    <option value="webp">WebP</option>
+                </select>
+            </div>
+            <div>
+                <label>JPEG质量（0-1）：</label>
+                <input type="number" id="quality" value="0.8" min="0" max="1" step="0.1">
+            </div>
+        </div>
+
+        <button onclick="processImage()" class="custom-upload">开始处理</button>
+        <a id="downloadLink" style="display:none; margin-top:20px;">下载处理后的图片</a>
+    </div>
+
+    <script>
+        let originalImage = null;
+
+        // 图片选择事件
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                originalImage = new Image();
+                originalImage.onload = function() {
+                    document.getElementById('width').placeholder = this.width;
+                    document.getElementById('height').placeholder = this.height;
+                    showPreview(this);
+                };
+                originalImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // 显示预览图
+        function showPreview(image) {
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = '';
+            const img = image.cloneNode();
+            img.className = 'preview';
+            previewContainer.appendChild(img);
+        }
+
+        // 处理图片
+        function processImage() {
+            if (!originalImage) {
+                alert('请先选择图片');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // 计算新尺寸
+            const originalWidth = originalImage.naturalWidth;
+            const originalHeight = originalImage.naturalHeight;
+            
+            let newWidth = parseInt(document.getElementById('width').value) || originalWidth;
+            let newHeight = parseInt(document.getElementById('height').value) || originalHeight;
+
+            // 保持宽高比
+            if (!document.getElementById('width').value && document.getElementById('height').value) {
+                newWidth = (originalWidth / originalHeight) * newHeight;
+            }
+            if (!document.getElementById('height').value && document.getElementById('width').value) {
+                newHeight = (originalHeight / originalWidth) * newWidth;
+            }
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            // 绘制图片
+            ctx.drawImage(originalImage, 0, 0, newWidth, newHeight);
+
+            // 转换格式
+            const format = document.getElementById('format').value;
+            const quality = parseFloat(document.getElementById('quality').value) || 0.8;
+
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.getElementById('downloadLink');
+                link.href = url;
+                link.download = `processed_image.${format}`;
+                link.style.display = 'inline-block';
+                link.click(); // 自动触发下载
+            }, `image/${format}`, quality);
+        }
+    </script>
+</body>
+</html>
