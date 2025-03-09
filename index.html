@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>技术博客 | 清风徐来</title>
-    
-    <!-- Bootstrap 5 CSS -->
+    <title>技术博客 | 完整功能版</title>
+
+    <!-- 核心依赖 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome 图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
 
-    <!-- Google Analytics 统计代码 -->
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -31,7 +27,6 @@
             --bg-color: #ffffff;
         }
 
-        /* 暗色模式变量 */
         [data-bs-theme="dark"] {
             --primary-color: #e0e0e0;
             --accent-color: #4dabf7;
@@ -43,205 +38,269 @@
             font-family: 'Noto Serif SC', serif;
             color: var(--text-color);
             background-color: var(--bg-color);
-            line-height: 1.8;
-            transition: background-color 0.3s, color 0.3s;
+            transition: all 0.3s ease;
         }
 
-        /* 导航栏样式 */
-        .navbar {
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            background-color: var(--bg-color);
+        /* 加载动画 */
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            display: none;
+        }
+
+        /* 阅读进度条 */
+        #readProgress {
+            height: 3px;
+            z-index: 9998;
         }
 
         /* 文章卡片 */
         .post-card {
             transition: transform 0.3s, box-shadow 0.3s;
-            background-color: var(--bg-color);
+            cursor: pointer;
         }
 
         .post-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-
-        /* 暗色模式切换按钮 */
-        .theme-switch {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
     </style>
 </head>
 <body>
+    <!-- 阅读进度条 -->
+    <div class="progress fixed-top rounded-0">
+        <div id="readProgress" class="progress-bar" role="progressbar"></div>
+    </div>
 
-<!-- 导航栏 -->
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <div class="container">
-        <a class="navbar-brand" href="#">技术博客</a>
-        
-        <!-- 搜索框 -->
-        <div class="d-flex align-items-center gap-3">
-            <div class="input-group search-box">
-                <input type="text" id="searchInput" 
-                       class="form-control" 
-                       placeholder="搜索文章..."
-                       aria-label="搜索文章">
-                <button class="btn btn-outline-primary" 
-                        onclick="searchArticles()">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-            <button class="btn btn-outline-secondary" 
-                    onclick="toggleTheme()">
-                <i class="fas fa-moon"></i>
-            </button>
+    <!-- 加载动画 -->
+    <div id="loading">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-</nav>
 
-<main class="container mt-5 pt-5">
-    <!-- 文章列表 -->
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div id="articleContainer">
-                <!-- 文章将通过JavaScript动态加载 -->
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">技术博客</a>
+            
+            <div class="d-flex align-items-center gap-3">
+                <!-- 搜索框 -->
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" 
+                           placeholder="搜索文章..." aria-label="搜索">
+                    <button class="btn btn-outline-primary" onclick="searchArticles()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <!-- 主题切换 -->
+                <button class="btn btn-outline-secondary" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5 pt-5">
+        <!-- 文章列表 -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div id="articleContainer"></div>
+                
+                <!-- 分页 -->
+                <nav aria-label="分页导航">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
             </div>
 
-            <!-- 分页 -->
-            <nav aria-label="文章分页">
-                <ul class="pagination justify-content-center" id="pagination"></ul>
-            </nav>
-        </div>
-
-        <!-- 侧边栏 -->
-        <div class="col-lg-4">
-            <div class="card sidebar-widget mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">关于作者</h5>
-                    <p class="card-text">全栈开发者，热爱技术分享</p>
+            <!-- 侧边栏 -->
+            <div class="col-lg-4">
+                <!-- 分类过滤 -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">文章分类</h5>
+                        <div id="tagCloud" class="d-flex flex-wrap gap-2"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 评论系统 -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div id="disqus_thread"></div>
+        <!-- 文章详情 -->
+        <div id="articleDetail" class="d-none">
+            <button onclick="closeDetail()" class="btn btn-link mb-3">
+                <i class="fas fa-arrow-left"></i> 返回列表
+            </button>
+            <h2 id="detailTitle"></h2>
+            <div id="detailContent"></div>
         </div>
-    </div>
-</main>
 
-<!-- 页脚 -->
-<footer class="bg-dark text-white py-4 mt-5">
-    <div class="container text-center">
-        <p class="mb-0">&copy; 2023 技术博客 保留所有权利</p>
-    </div>
-</footer>
+        <!-- 评论系统 -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div id="disqus_thread"></div>
+            </div>
+        </div>
+    </main>
 
-<!-- 脚本 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // ========== 暗色模式切换 ==========
-    function toggleTheme() {
-        const html = document.documentElement;
-        const isDark = html.getAttribute('data-bs-theme') === 'dark';
-        html.setAttribute('data-bs-theme', isDark ? 'light' : 'dark');
-        localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    }
+    <!-- 脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ========== 初始化数据 ==========
+        let currentPage = 1;
+        const articlesPerPage = 5;
+        const allArticles = [
+            {
+                id: 1,
+                title: "我是谁",
+                content: "我是酷鱼，自由遨游天地之间...",
+                tags: ["JavaScript"],
+                date: "2025-03-09"
+            }
+            {
+                id: 2,
+                title: "Flex布局完全指南",
+                content: "Flexible Box布局是现代Web开发的核心技术...",
+                tags: ["CSS", "布局"],
+                date: "2023-08-01"
+            },
 
-    // 初始化主题
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            // 添加更多测试文章...
+        ];
 
-    // ========== 文章数据 ==========
-    const allArticles = [
-        {
-            id: 1,
-            title: "深入理解CSS Flex布局",
-            content: "Flex布局是现代Web开发的重要技术...",
-            tags: ["CSS", "布局"],
-            date: "2023-08-01"
-        },
-        {
-            id: 2,
-            title: "了解我的工作",
-            content: "我是一只酷鱼，自由游荡在天地之间...",
-            tags: ["CSS", "布局"],
-            date: "2025-03-09"
-        },
-        // 添加更多文章...
-    ];
-
-    // ========== 分页功能 ==========
-    let currentPage = 1;
-    const articlesPerPage = 5;
-
-    function renderArticles(page) {
-        const start = (page - 1) * articlesPerPage;
-        const end = start + articlesPerPage;
-        const articles = allArticles.slice(start, end);
-        
-        let html = '';
-        articles.forEach(article => {
-            html += `
-                <div class="card post-card mb-4">
-                    <div class="card-body">
-                        <h2 class="h4">${article.title}</h2>
-                        <p>${article.content}</p>
-                        <div class="d-flex gap-2">
-                            ${article.tags.map(tag => 
-                                `<span class="badge bg-primary">${tag}</span>`
-                            ).join('')}
-                        </div>
-                    </div>
-                </div>`;
-        });
-        document.getElementById('articleContainer').innerHTML = html;
-    }
-
-    function setupPagination() {
-        const pageCount = Math.ceil(allArticles.length / articlesPerPage);
-        let paginationHTML = '';
-        for(let i = 1; i <= pageCount; i++) {
-            paginationHTML += `
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" onclick="changePage(${i})">${i}</a>
-                </li>`;
+        // ========== 主题切换 ==========
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-bs-theme') === 'dark';
+            html.setAttribute('data-bs-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
-        document.getElementById('pagination').innerHTML = paginationHTML;
-    }
 
-    function changePage(page) {
-        currentPage = page;
-        renderArticles(page);
-        setupPagination();
-    }
+        // ========== 文章渲染 ==========
+        function renderArticles(page, articles = allArticles) {
+            showLoading();
+            const start = (page - 1) * articlesPerPage;
+            const end = start + articlesPerPage;
+            
+            setTimeout(() => {
+                document.getElementById('articleContainer').innerHTML = articles
+                    .slice(start, end)
+                    .map(article => `
+                        <div class="card post-card mb-4" onclick="showDetail(${article.id})">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <small>${article.date}</small>
+                                    <div>${article.tags.map(t => `<span class="badge bg-primary">${t}</span>`).join(' ')}</div>
+                                </div>
+                                <h3 class="h5">${article.title}</h3>
+                                <p>${article.content}</p>
+                            </div>
+                        </div>`
+                    ).join('');
+                setupPagination(articles.length);
+                hideLoading();
+            }, 500);
+        }
 
-    // 初始化文章和分页
-    renderArticles(1);
-    setupPagination();
+        // ========== 分页系统 ==========
+        function setupPagination(totalItems) {
+            const pageCount = Math.ceil(totalItems / articlesPerPage);
+            document.getElementById('pagination').innerHTML = Array(pageCount)
+                .fill()
+                .map((_, i) => `
+                    <li class="page-item ${i+1 === currentPage ? 'active' : ''}">
+                        <a class="page-link" onclick="changePage(${i+1})">${i+1}</a>
+                    </li>`
+                ).join('');
+        }
 
-    // ========== 搜索功能 ==========
-    function searchArticles() {
-        const keyword = document.getElementById('searchInput').value.toLowerCase();
-        const results = allArticles.filter(article => 
-            article.title.toLowerCase().includes(keyword) || 
-            article.content.toLowerCase().includes(keyword)
-        );
-        // 显示搜索结果（可扩展为独立界面）
-        console.log('搜索结果:', results);
-        alert(`找到 ${results.length} 篇相关文章`);
-    }
+        function changePage(page) {
+            currentPage = page;
+            renderArticles(page);
+        }
 
-    // ========== Disqus评论系统 ==========
-    (function() {
-        const d = document, s = d.createElement('script');
-        s.src = 'https://yzsczx.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
+        // ========== 搜索功能 ==========
+        function searchArticles() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const results = allArticles.filter(article => 
+                article.title.toLowerCase().includes(keyword) || 
+                article.content.toLowerCase().includes(keyword)
+            );
+            currentPage = 1;
+            renderArticles(1, results);
+        }
+
+        // ========== 分类过滤 ==========
+        function initTags() {
+            const tags = [...new Set(allArticles.flatMap(a => a.tags))];
+            document.getElementById('tagCloud').innerHTML = tags
+                .map(tag => `
+                    <button class="btn btn-sm btn-outline-secondary" 
+                            onclick="filterByTag('${tag}')">
+                        ${tag}
+                    </button>`
+                ).join('');
+        }
+
+        function filterByTag(tag) {
+            const filtered = allArticles.filter(a => a.tags.includes(tag));
+            currentPage = 1;
+            renderArticles(1, filtered);
+        }
+
+        // ========== 文章详情 ==========
+        function showDetail(id) {
+            const article = allArticles.find(a => a.id === id);
+            document.getElementById('articleContainer').classList.add('d-none');
+            document.getElementById('articleDetail').classList.remove('d-none');
+            document.getElementById('detailTitle').textContent = article.title;
+            document.getElementById('detailContent').innerHTML = `
+                <p class="text-muted mb-4">${article.date}</p>
+                <div>${article.content}</div>
+            `;
+        }
+
+        function closeDetail() {
+            document.getElementById('articleContainer').classList.remove('d-none');
+            document.getElementById('articleDetail').classList.add('d-none');
+        }
+
+        // ========== 加载控制 ==========
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // ========== 阅读进度 ==========
+        window.addEventListener('scroll', () => {
+            const scrolled = (window.scrollY / 
+                (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            document.getElementById('readProgress').style.width = `${scrolled}%`;
+        });
+
+        // ========== 初始化 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            document.documentElement.setAttribute(
+                'data-bs-theme', 
+                localStorage.getItem('theme') || 'light'
+            );
+            renderArticles(1);
+            initTags();
+        });
+
+        // ========== Disqus评论 ==========
+        (function() {
+            const d = document, s = d.createElement('script');
+            s.src = 'https://yzsczx.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
 </body>
 </html>
