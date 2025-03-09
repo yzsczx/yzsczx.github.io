@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>清风徐来 | 酷鱼的小站</title>
-    <!-- 核心依赖 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
@@ -14,14 +13,14 @@
             --accent-color: #3498db;
             --text-color: #34495e;
             --bg-color: #ffffff;
-            --bg-color-rgb: 255,255,255; /* 新增RGB变量 */
+            --bg-color-rgb: 255,255,255;
         }
         [data-bs-theme="dark"] {
             --primary-color: #e0e0e0;
             --accent-color: #4dabf7;
             --text-color: #f8f9fa;
             --bg-color: #212529;
-            --bg-color-rgb: 33,37,41; /* 新增RGB变量 */
+            --bg-color-rgb: 33,37,41;
         }
         body {
             font-family: 'Noto Serif SC', serif;
@@ -200,25 +199,29 @@
                 </nav>
             </div>
             <div class="col-lg-4">
+                <!-- 文章分类 -->
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">文章分类</h5>
                         <div id="tagCloud" class="d-flex flex-wrap gap-2"></div>
                     </div>
                 </div>
+                <!-- Disqus评论 -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">评论</h5>
+                        <div id="disqus_thread"></div>
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- 文章详情 -->
         <div id="articleDetail" class="d-none">
             <button onclick="closeDetail()" class="btn btn-link mb-3">
                 <i class="fas fa-arrow-left"></i> 返回列表
             </button>
             <h2 id="detailTitle"></h2>
             <div id="detailContent"></div>
-        </div>
-        <div class="row mt-5">
-            <div class="col-12">
-                <div id="disqus_thread"></div>
-            </div>
         </div>
     </main>
     <!-- 引入Bootstrap JS -->
@@ -237,6 +240,7 @@
             }
         ];
 
+        // 表单提交处理
         function handleSubmit(event) {
             event.preventDefault();
             const newPost = {
@@ -259,6 +263,7 @@
             document.getElementById('postForm').reset();
         }
 
+        // 渲染文章列表
         function renderArticles(page, articles = allArticles) {
             const start = (page - 1) * articlesPerPage;
             const end = start + articlesPerPage;
@@ -285,7 +290,7 @@
             setupPagination(articles.length);
         }
 
-        // 初始化Bootstrap组件
+        // 初始化组件
         document.addEventListener('DOMContentLoaded', () => {
             new bootstrap.Modal(document.getElementById('postModal'));
             document.documentElement.setAttribute(
@@ -296,18 +301,19 @@
             initTags();
         });
 
-        // 完整实现所有函数
+        // 主题切换
         function toggleTheme() {
             const theme = document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-bs-theme', theme);
             localStorage.setItem('theme', theme);
         }
 
+        // 分页
         function setupPagination(totalArticles) {
             const totalPages = Math.ceil(totalArticles / articlesPerPage);
             const pagination = document.getElementById('pagination');
             pagination.innerHTML = '';
-            for(let i = 1; i <= totalPages; i++) {
+            for (let i = 1; i <= totalPages; i++) {
                 const active = i === currentPage ? 'active' : '';
                 pagination.innerHTML += `
                     <li class="page-item ${active}">
@@ -317,6 +323,7 @@
             }
         }
 
+        // 搜索功能
         function searchArticles() {
             const keyword = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allArticles.filter(article => 
@@ -326,6 +333,7 @@
             renderArticles(1, filtered);
         }
 
+        // 标签云初始化
         function initTags() {
             const tagCloud = document.getElementById('tagCloud');
             const tags = allArticles.flatMap(a => a.tags).filter((v,i,a)=>a.indexOf(v)===i);
@@ -334,11 +342,13 @@
             ).join(' ');
         }
 
+        // 标签过滤
         function filterByTag(tag) {
             const filtered = allArticles.filter(a => a.tags.includes(tag));
             renderArticles(1, filtered);
         }
 
+        // 文章详情展示
         function showDetail(id) {
             const article = allArticles.find(a => a.id === id);
             document.getElementById('detailTitle').innerText = article.title;
@@ -346,19 +356,12 @@
             document.getElementById('articleDetail').classList.remove('d-none');
         }
 
+        // 关闭详情
         function closeDetail() {
             document.getElementById('articleDetail').classList.add('d-none');
         }
 
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        // Disqus评论初始化
+        // Disqus初始化
         (function() {
             const d = document, s = d.createElement('script');
             s.src = 'https://yzsczx.disqus.com/embed.js';
