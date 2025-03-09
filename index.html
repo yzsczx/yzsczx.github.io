@@ -3,46 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 保持原标题 -->
     <title>清风徐来 | 酷鱼的小站</title>
-
-    <!-- 核心依赖 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
-
     <style>
-        /* 保持原有所有样式 */
         :root {
             --primary-color: #2c3e50;
             --accent-color: #3498db;
             --text-color: #34495e;
             --bg-color: #ffffff;
+            /* 新增RGB变量 */
+            --bg-color-rgb: 255,255,255;
         }
-
         [data-bs-theme="dark"] {
             --primary-color: #e0e0e0;
             --accent-color: #4dabf7;
             --text-color: #f8f9fa;
             --bg-color: #212529;
+            /* 新增RGB变量 */
+            --bg-color-rgb: 33,37,41;
         }
-
         body {
             font-family: 'Noto Serif SC', serif;
             color: var(--text-color);
             background-color: var(--bg-color);
             transition: all 0.3s ease;
-            padding-top: 80px; /* 新增导航栏高度补偿 */
+            padding-top: 80px;
         }
-
-        /* 新增导航栏样式 */
         .navbar {
             background: rgba(var(--bg-color-rgb), 0.97) !important;
             backdrop-filter: blur(10px);
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-
         .nav-link {
             position: relative;
             padding: 0.5rem 1rem;
@@ -50,7 +44,6 @@
             color: var(--text-color) !important;
             transition: all 0.3s ease;
         }
-
         .nav-link::after {
             content: '';
             position: absolute;
@@ -61,28 +54,22 @@
             background: var(--accent-color);
             transition: all 0.3s ease;
         }
-
         .nav-link:hover::after,
         .nav-link.active::after {
             width: 100%;
             left: 0;
         }
-
-        /* 新增模态框样式 */
         .modal-content {
             background-color: var(--bg-color);
             color: var(--text-color);
             border-radius: 12px;
         }
-
         .form-floating textarea {
             height: 150px;
             min-height: 100px;
             max-height: 300px;
             resize: vertical;
         }
-
-        /* 保持原有其他样式 */
         #loading {
             position: fixed;
             top: 50%;
@@ -91,18 +78,15 @@
             z-index: 9999;
             display: none;
         }
-
         #readProgress {
             height: 3px;
             z-index: 9998;
         }
-
         .post-card {
             transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
             background: var(--bg-color);
         }
-
         .post-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -110,34 +94,29 @@
     </style>
 </head>
 <body>
-    <!-- 阅读进度条（保持原样） -->
+    <!-- 阅读进度条 -->
     <div class="progress fixed-top rounded-0">
         <div id="readProgress" class="progress-bar" role="progressbar"></div>
     </div>
-
-    <!-- 加载动画（保持原样） -->
+    <!-- 加载动画 -->
     <div id="loading">
         <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-
-    <!-- 新增导航栏 -->
+    <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <!-- 保持原有品牌名称 -->
             <a class="navbar-brand" href="#">技术博客</a>
-
             <button class="navbar-toggler" type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">首页</a>
+                        <a class="nav-link active" href="#home">首页</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
@@ -146,7 +125,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="dianm.html">随机点名</a></li>
                             <li><a class="dropdown-item" href="ps.html">图片处理</a></li>
-                            <li><a class="dropdown-item" onclick="filterByTag('前端')">前端开发</a></li>
+                            <li><a class="dropdown-item" href="#filter-frontend">前端开发</a></li>
                             <li><a class="dropdown-item" onclick="filterByTag('后端')">后端技术</a></li>
                         </ul>
                     </li>
@@ -156,8 +135,6 @@
                         </button>
                     </li>
                 </ul>
-
-                <!-- 保持原有搜索和主题切换 -->
                 <div class="d-flex align-items-center gap-3">
                     <div class="input-group">
                         <input type="text" id="searchInput" class="form-control" 
@@ -173,8 +150,7 @@
             </div>
         </div>
     </nav>
-
-    <!-- 新增发表文章模态框 -->
+    <!-- 发表文章模态框 -->
     <div class="modal fade" id="postModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -188,12 +164,10 @@
                             <input type="text" class="form-control" id="postTitle" required>
                             <label>文章标题</label>
                         </div>
-                        
                         <div class="form-floating mb-3">
                             <textarea class="form-control" id="postContent" required></textarea>
                             <label>文章内容</label>
                         </div>
-                        
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
@@ -208,7 +182,6 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                             <button type="submit" class="btn btn-primary">立即发布</button>
@@ -218,18 +191,15 @@
             </div>
         </div>
     </div>
-
-    <!-- 保持原有main内容不变 -->
+    <!-- 主内容 -->
     <main class="container mt-4">
         <div class="row g-4">
             <div class="col-lg-8">
                 <div id="articleContainer"></div>
-                
                 <nav aria-label="分页导航">
                     <ul class="pagination justify-content-center" id="pagination"></ul>
                 </nav>
             </div>
-
             <div class="col-lg-4">
                 <div class="card mb-4">
                     <div class="card-body">
@@ -239,7 +209,6 @@
                 </div>
             </div>
         </div>
-
         <div id="articleDetail" class="d-none">
             <button onclick="closeDetail()" class="btn btn-link mb-3">
                 <i class="fas fa-arrow-left"></i> 返回列表
@@ -247,16 +216,13 @@
             <h2 id="detailTitle"></h2>
             <div id="detailContent"></div>
         </div>
-
         <div class="row mt-5">
             <div class="col-12">
                 <div id="disqus_thread"></div>
             </div>
         </div>
     </main>
-
     <script>
-        // ========== 初始化数据（保持原样） ==========
         let currentPage = 1;
         const articlesPerPage = 5;
         let allArticles = [
@@ -270,10 +236,8 @@
             }
         ];
 
-        // ========== 新增文章处理逻辑 ==========
         function handleSubmit(event) {
             event.preventDefault();
-            
             const newPost = {
                 id: Date.now(),
                 title: document.getElementById('postTitle').value,
@@ -282,12 +246,9 @@
                 date: new Date().toLocaleDateString('zh-CN'),
                 link: document.getElementById('postLink').value || null
             };
-
             allArticles.unshift(newPost);
             resetForm();
             renderArticles(1);
-            
-            // 关闭模态框
             const modal = bootstrap.Modal.getInstance(document.getElementById('postModal'));
             modal.hide();
             return false;
@@ -297,11 +258,9 @@
             document.getElementById('postForm').reset();
         }
 
-        // ========== 修改渲染函数（兼容链接显示） ==========
         function renderArticles(page, articles = allArticles) {
             const start = (page - 1) * articlesPerPage;
             const end = start + articlesPerPage;
-            
             document.getElementById('articleContainer').innerHTML = articles
                 .slice(start, end)
                 .map(article => `
@@ -322,15 +281,11 @@
                         </div>
                     </div>`
                 ).join('');
-                
             setupPagination(articles.length);
         }
 
-        // ========== 初始化Bootstrap组件 ==========
         document.addEventListener('DOMContentLoaded', () => {
             new bootstrap.Modal(document.getElementById('postModal'));
-            
-            // 保持原有初始化逻辑
             document.documentElement.setAttribute(
                 'data-bs-theme', 
                 localStorage.getItem('theme') || 'light'
@@ -339,19 +294,18 @@
             initTags();
         });
 
-        // ========== 保留所有原有函数（完整未修改） ==========
-        function toggleTheme() { /*...*/ }
-        function setupPagination() { /*...*/ }
-        function changePage() { /*...*/ }
-        function searchArticles() { /*...*/ }
-        function initTags() { /*...*/ }
-        function filterByTag() { /*...*/ }
-        function showDetail() { /*...*/ }
-        function closeDetail() { /*...*/ }
-        function showLoading() { /*...*/ }
-        function hideLoading() { /*...*/ }
+        // 以下函数需确保已正确实现（根据注释保留原有代码）
+        function toggleTheme() { /* 主题切换逻辑 */ }
+        function setupPagination() { /* 分页逻辑 */ }
+        function changePage() { /* 分页点击事件 */ }
+        function searchArticles() { /* 搜索功能 */ }
+        function initTags() { /* 标签云初始化 */ }
+        function filterByTag() { /* 标签筛选 */ }
+        function showDetail() { /* 文章详情展示 */ }
+        function closeDetail() { /* 关闭详情 */ }
+        function showLoading() { /* 加载动画 */ }
+        function hideLoading() { /* 隐藏加载 */ }
 
-        // ========== Disqus评论（保持原样） ==========
         (function() {
             const d = document, s = d.createElement('script');
             s.src = 'https://yzsczx.disqus.com/embed.js';
