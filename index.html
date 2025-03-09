@@ -3,44 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>技术博客 | 完整版</title>
-    
+    <title>清风徐来 | 酷鱼的小站</title>
     <!-- 核心依赖 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
-
     <style>
         :root {
             --primary-color: #2c3e50;
             --accent-color: #3498db;
             --text-color: #34495e;
             --bg-color: #ffffff;
+            --bg-color-rgb: 255,255,255; /* 新增RGB变量 */
         }
-
         [data-bs-theme="dark"] {
             --primary-color: #e0e0e0;
             --accent-color: #4dabf7;
             --text-color: #f8f9fa;
             --bg-color: #212529;
+            --bg-color-rgb: 33,37,41; /* 新增RGB变量 */
         }
-
         body {
             font-family: 'Noto Serif SC', serif;
             color: var(--text-color);
             background-color: var(--bg-color);
             transition: all 0.3s ease;
-            padding-top: 80px; /* 导航栏高度 */
+            padding-top: 80px;
         }
-
-        /* 导航栏样式 */
         .navbar {
-            background: rgba(255,255,255,0.97) !important;
+            background: rgba(var(--bg-color-rgb), 0.97) !important;
             backdrop-filter: blur(10px);
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-
         .nav-link {
             position: relative;
             padding: 0.5rem 1rem;
@@ -48,7 +43,6 @@
             color: var(--text-color) !important;
             transition: all 0.3s ease;
         }
-
         .nav-link::after {
             content: '';
             position: absolute;
@@ -59,36 +53,39 @@
             background: var(--accent-color);
             transition: all 0.3s ease;
         }
-
         .nav-link:hover::after,
         .nav-link.active::after {
             width: 100%;
             left: 0;
         }
-
-        /* 发表表单 */
-        .post-form {
-            background: var(--bg-color);
-            padding: 2rem;
+        .modal-content {
+            background-color: var(--bg-color);
+            color: var(--text-color);
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin: 2rem 0;
         }
-
         .form-floating textarea {
             height: 150px;
             min-height: 100px;
             max-height: 300px;
             resize: vertical;
         }
-
-        /* 文章卡片 */
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            display: none;
+        }
+        #readProgress {
+            height: 3px;
+            z-index: 9998;
+        }
         .post-card {
             transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
             background: var(--bg-color);
         }
-
         .post-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -96,40 +93,47 @@
     </style>
 </head>
 <body>
+    <!-- 阅读进度条 -->
+    <div class="progress fixed-top rounded-0">
+        <div id="readProgress" class="progress-bar" role="progressbar"></div>
+    </div>
+    <!-- 加载动画 -->
+    <div id="loading">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
     <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-blog me-2 text-primary"></i>
-                技术博客
-            </a>
-
+            <a class="navbar-brand" href="#">技术博客</a>
             <button class="navbar-toggler" type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#articleList">首页</a>
+                        <a class="nav-link active" href="#home">首页</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             分类
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="filterByTag('前端')">前端开发</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="filterByTag('后端')">后端技术</a></li>
+                            <li><a class="dropdown-item" href="dianm.html">随机点名</a></li>
+                            <li><a class="dropdown-item" href="ps.html">图片处理</a></li>
+                            <li><a class="dropdown-item" href="#filter-frontend">前端开发</a></li>
+                            <li><a class="dropdown-item" onclick="filterByTag('后端')">后端技术</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#postForm">发表文章</a>
+                        <button class="nav-link btn" data-bs-toggle="modal" data-bs-target="#postModal">
+                            发表文章
+                        </button>
                     </li>
                 </ul>
-
-                <!-- 搜索和主题切换 -->
                 <div class="d-flex align-items-center gap-3">
                     <div class="input-group">
                         <input type="text" id="searchInput" class="form-control" 
@@ -145,88 +149,96 @@
             </div>
         </div>
     </nav>
-
-    <!-- 发表文章表单 -->
-    <section id="postForm" class="container">
-        <div class="post-form">
-            <h2 class="mb-4">发表新文章</h2>
-            <form onsubmit="return handleSubmit(event)">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="postTitle" 
-                           placeholder="文章标题" required>
+    <!-- 发表文章模态框 -->
+    <div class="modal fade" id="postModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">发表新文章</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mb-3">
-                    <textarea class="form-control" id="postContent" 
-                              rows="6" placeholder="文章内容" required></textarea>
+                <div class="modal-body">
+                    <form id="postForm" onsubmit="return handleSubmit(event)">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="postTitle" required>
+                            <label>文章标题</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="postContent" required></textarea>
+                            <label>文章内容</label>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="postTags">
+                                    <label>标签（逗号分隔）</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="url" class="form-control" id="postLink">
+                                    <label>相关链接</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary">立即发布</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" 
-                               id="postTags" placeholder="标签（用逗号分隔）">
-                    </div>
-                    <div class="col-md-6">
-                        <input type="url" class="form-control" 
-                               id="postLink" placeholder="相关链接（可选）">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">立即发布</button>
-            </form>
+            </div>
         </div>
-    </section>
-
-    <!-- 文章列表 -->
-    <main id="articleList" class="container">
+    </div>
+    <!-- 主内容 -->
+    <main class="container mt-4">
         <div class="row g-4">
             <div class="col-lg-8">
                 <div id="articleContainer"></div>
-                
-                <!-- 分页 -->
                 <nav aria-label="分页导航">
                     <ul class="pagination justify-content-center" id="pagination"></ul>
                 </nav>
             </div>
-
-            <!-- 侧边栏 -->
             <div class="col-lg-4">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">热门标签</h5>
+                        <h5 class="card-title">文章分类</h5>
                         <div id="tagCloud" class="d-flex flex-wrap gap-2"></div>
                     </div>
                 </div>
             </div>
         </div>
+        <div id="articleDetail" class="d-none">
+            <button onclick="closeDetail()" class="btn btn-link mb-3">
+                <i class="fas fa-arrow-left"></i> 返回列表
+            </button>
+            <h2 id="detailTitle"></h2>
+            <div id="detailContent"></div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12">
+                <div id="disqus_thread"></div>
+            </div>
+        </div>
     </main>
-
-    <!-- 脚本 -->
+    <!-- 引入Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 初始化数据
         let currentPage = 1;
         const articlesPerPage = 5;
         let allArticles = [
             {
                 id: 1,
-                title: "欢迎使用技术博客",
-                content: "这是一个演示文章，欢迎发表你自己的技术分享！",
-                tags: ["欢迎"],
-                date: new Date().toLocaleDateString('zh-CN'),
+                title: "Flex布局完全指南",
+                content: "Flexible Box布局是现代Web开发的核心技术...",
+                tags: ["CSS", "布局"],
+                date: "2023-08-01",
                 link: null
             }
         ];
 
-        // 主题切换
-        function toggleTheme() {
-            const html = document.documentElement;
-            const isDark = html.getAttribute('data-bs-theme') === 'dark';
-            html.setAttribute('data-bs-theme', isDark ? 'light' : 'dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
-        }
-
-        // 发表文章
         function handleSubmit(event) {
             event.preventDefault();
-            
             const newPost = {
                 id: Date.now(),
                 title: document.getElementById('postTitle').value,
@@ -235,30 +247,25 @@
                 date: new Date().toLocaleDateString('zh-CN'),
                 link: document.getElementById('postLink').value || null
             };
-
             allArticles.unshift(newPost);
-            renderArticles(1);
             resetForm();
-            window.location.hash = '#articleList';
+            renderArticles(1);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('postModal'));
+            modal.hide();
             return false;
         }
 
         function resetForm() {
-            document.getElementById('postTitle').value = '';
-            document.getElementById('postContent').value = '';
-            document.getElementById('postTags').value = '';
-            document.getElementById('postLink').value = '';
+            document.getElementById('postForm').reset();
         }
 
-        // 渲染文章
         function renderArticles(page, articles = allArticles) {
             const start = (page - 1) * articlesPerPage;
             const end = start + articlesPerPage;
-            
             document.getElementById('articleContainer').innerHTML = articles
                 .slice(start, end)
                 .map(article => `
-                    <div class="card post-card mb-4">
+                    <div class="card post-card mb-4" onclick="showDetail(${article.id})">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-3">
                                 <small>${article.date}</small>
@@ -269,64 +276,18 @@
                             <h3 class="h5">${article.title}</h3>
                             <p>${article.content}</p>
                             ${article.link ? 
-                                `<a href="${article.link}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                `<a href="${article.link}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
                                     <i class="fas fa-external-link-alt me-1"></i>相关链接
                                 </a>` : ''}
                         </div>
                     </div>`
                 ).join('');
-                
             setupPagination(articles.length);
         }
 
-        // 分页功能
-        function setupPagination(totalItems) {
-            const pageCount = Math.ceil(totalItems / articlesPerPage);
-            document.getElementById('pagination').innerHTML = Array(pageCount)
-                .fill()
-                .map((_, i) => `
-                    <li class="page-item ${i+1 === currentPage ? 'active' : ''}">
-                        <a class="page-link" onclick="changePage(${i+1})">${i+1}</a>
-                    </li>`
-                ).join('');
-        }
-
-        function changePage(page) {
-            currentPage = page;
-            renderArticles(page);
-        }
-
-        // 搜索功能
-        function searchArticles() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const results = allArticles.filter(article => 
-                article.title.toLowerCase().includes(keyword) || 
-                article.content.toLowerCase().includes(keyword)
-            );
-            currentPage = 1;
-            renderArticles(1, results);
-        }
-
-        // 标签功能
-        function initTags() {
-            const tags = [...new Set(allArticles.flatMap(a => a.tags))];
-            document.getElementById('tagCloud').innerHTML = tags
-                .map(tag => `
-                    <button class="btn btn-sm btn-outline-secondary" 
-                            onclick="filterByTag('${tag}')">
-                        ${tag}
-                    </button>`
-                ).join('');
-        }
-
-        function filterByTag(tag) {
-            const filtered = allArticles.filter(a => a.tags.includes(tag));
-            currentPage = 1;
-            renderArticles(1, filtered);
-        }
-
-        // 初始化
+        // 初始化Bootstrap组件
         document.addEventListener('DOMContentLoaded', () => {
+            new bootstrap.Modal(document.getElementById('postModal'));
             document.documentElement.setAttribute(
                 'data-bs-theme', 
                 localStorage.getItem('theme') || 'light'
@@ -334,6 +295,76 @@
             renderArticles(1);
             initTags();
         });
+
+        // 完整实现所有函数
+        function toggleTheme() {
+            const theme = document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        function setupPagination(totalArticles) {
+            const totalPages = Math.ceil(totalArticles / articlesPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            for(let i = 1; i <= totalPages; i++) {
+                const active = i === currentPage ? 'active' : '';
+                pagination.innerHTML += `
+                    <li class="page-item ${active}">
+                        <button class="page-link" onclick="renderArticles(${i})">${i}</button>
+                    </li>
+                `;
+            }
+        }
+
+        function searchArticles() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allArticles.filter(article => 
+                article.title.toLowerCase().includes(keyword) || 
+                article.content.toLowerCase().includes(keyword)
+            );
+            renderArticles(1, filtered);
+        }
+
+        function initTags() {
+            const tagCloud = document.getElementById('tagCloud');
+            const tags = allArticles.flatMap(a => a.tags).filter((v,i,a)=>a.indexOf(v)===i);
+            tagCloud.innerHTML = tags.map(t => 
+                `<button class="btn btn-sm btn-light" onclick="filterByTag('${t}')">${t}</button>`
+            ).join(' ');
+        }
+
+        function filterByTag(tag) {
+            const filtered = allArticles.filter(a => a.tags.includes(tag));
+            renderArticles(1, filtered);
+        }
+
+        function showDetail(id) {
+            const article = allArticles.find(a => a.id === id);
+            document.getElementById('detailTitle').innerText = article.title;
+            document.getElementById('detailContent').innerHTML = article.content;
+            document.getElementById('articleDetail').classList.remove('d-none');
+        }
+
+        function closeDetail() {
+            document.getElementById('articleDetail').classList.add('d-none');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Disqus评论初始化
+        (function() {
+            const d = document, s = d.createElement('script');
+            s.src = 'https://yzsczx.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
     </script>
 </body>
 </html>
