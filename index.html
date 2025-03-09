@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>清风徐来 | 酷鱼的小站</title>
+    <!-- 核心依赖 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
@@ -13,16 +14,14 @@
             --accent-color: #3498db;
             --text-color: #34495e;
             --bg-color: #ffffff;
-            /* 新增RGB变量 */
-            --bg-color-rgb: 255,255,255;
+            --bg-color-rgb: 255,255,255; /* 新增RGB变量 */
         }
         [data-bs-theme="dark"] {
             --primary-color: #e0e0e0;
             --accent-color: #4dabf7;
             --text-color: #f8f9fa;
             --bg-color: #212529;
-            /* 新增RGB变量 */
-            --bg-color-rgb: 33,37,41;
+            --bg-color-rgb: 33,37,41; /* 新增RGB变量 */
         }
         body {
             font-family: 'Noto Serif SC', serif;
@@ -130,7 +129,7 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="modal" data-bs-target="#postModal">
+                        <button class="nav-link btn" data-bs-toggle="modal" data-bs-target="#postModal">
                             发表文章
                         </button>
                     </li>
@@ -222,6 +221,8 @@
             </div>
         </div>
     </main>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentPage = 1;
         const articlesPerPage = 5;
@@ -284,6 +285,7 @@
             setupPagination(articles.length);
         }
 
+        // 初始化Bootstrap组件
         document.addEventListener('DOMContentLoaded', () => {
             new bootstrap.Modal(document.getElementById('postModal'));
             document.documentElement.setAttribute(
@@ -294,18 +296,69 @@
             initTags();
         });
 
-        // 以下函数需确保已正确实现（根据注释保留原有代码）
-        function toggleTheme() { /* 主题切换逻辑 */ }
-        function setupPagination() { /* 分页逻辑 */ }
-        function changePage() { /* 分页点击事件 */ }
-        function searchArticles() { /* 搜索功能 */ }
-        function initTags() { /* 标签云初始化 */ }
-        function filterByTag() { /* 标签筛选 */ }
-        function showDetail() { /* 文章详情展示 */ }
-        function closeDetail() { /* 关闭详情 */ }
-        function showLoading() { /* 加载动画 */ }
-        function hideLoading() { /* 隐藏加载 */ }
+        // 完整实现所有函数
+        function toggleTheme() {
+            const theme = document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
 
+        function setupPagination(totalArticles) {
+            const totalPages = Math.ceil(totalArticles / articlesPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            for(let i = 1; i <= totalPages; i++) {
+                const active = i === currentPage ? 'active' : '';
+                pagination.innerHTML += `
+                    <li class="page-item ${active}">
+                        <button class="page-link" onclick="renderArticles(${i})">${i}</button>
+                    </li>
+                `;
+            }
+        }
+
+        function searchArticles() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allArticles.filter(article => 
+                article.title.toLowerCase().includes(keyword) || 
+                article.content.toLowerCase().includes(keyword)
+            );
+            renderArticles(1, filtered);
+        }
+
+        function initTags() {
+            const tagCloud = document.getElementById('tagCloud');
+            const tags = allArticles.flatMap(a => a.tags).filter((v,i,a)=>a.indexOf(v)===i);
+            tagCloud.innerHTML = tags.map(t => 
+                `<button class="btn btn-sm btn-light" onclick="filterByTag('${t}')">${t}</button>`
+            ).join(' ');
+        }
+
+        function filterByTag(tag) {
+            const filtered = allArticles.filter(a => a.tags.includes(tag));
+            renderArticles(1, filtered);
+        }
+
+        function showDetail(id) {
+            const article = allArticles.find(a => a.id === id);
+            document.getElementById('detailTitle').innerText = article.title;
+            document.getElementById('detailContent').innerHTML = article.content;
+            document.getElementById('articleDetail').classList.remove('d-none');
+        }
+
+        function closeDetail() {
+            document.getElementById('articleDetail').classList.add('d-none');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Disqus评论初始化
         (function() {
             const d = document, s = d.createElement('script');
             s.src = 'https://yzsczx.disqus.com/embed.js';
