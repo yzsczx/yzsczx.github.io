@@ -1,11 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-bs-theme="light">
 <head>
-    <!-- 保持原有head内容不变 -->
-    <!-- ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清风徐来 | 酷鱼的小站</title>
     
+    <!-- 核心依赖 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
+
     <style>
-        /* 新增导航栏样式 */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --text-color: #34495e;
+            --bg-color: #ffffff;
+        }
+
+        [data-bs-theme="dark"] {
+            --primary-color: #e0e0e0;
+            --accent-color: #4dabf7;
+            --text-color: #f8f9fa;
+            --bg-color: #212529;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: all 0.3s ease;
+            padding-top: 80px; /* 导航栏高度 */
+        }
+
+        /* 导航栏样式 */
         .navbar {
             background: rgba(255,255,255,0.97) !important;
             backdrop-filter: blur(10px);
@@ -17,7 +45,7 @@
             position: relative;
             padding: 0.5rem 1rem;
             margin: 0 0.3rem;
-            color: #2c3e50 !important;
+            color: var(--text-color) !important;
             transition: all 0.3s ease;
         }
 
@@ -28,7 +56,7 @@
             left: 50%;
             width: 0;
             height: 2px;
-            background: #3498db;
+            background: var(--accent-color);
             transition: all 0.3s ease;
         }
 
@@ -38,19 +66,42 @@
             left: 0;
         }
 
-        /* 调整主体内容间距 */
-        main {
-            margin-top: 80px; /* 给固定导航栏留出空间 */
+        /* 发表表单 */
+        .post-form {
+            background: var(--bg-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+        }
+
+        .form-floating textarea {
+            height: 150px;
+            min-height: 100px;
+            max-height: 300px;
+            resize: vertical;
+        }
+
+        /* 文章卡片 */
+        .post-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            background: var(--bg-color);
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
-    <!-- 新增导航栏 -->
+    <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-blog me-2 text-primary"></i>
-                清风徐来
+                技术博客
             </a>
 
             <button class="navbar-toggler" type="button" 
@@ -62,45 +113,32 @@
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">首页</a>
+                        <a class="nav-link active" href="#articleList">首页</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" 
-                           role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             分类
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="ps.html">图片处理</a></li>
-                            <li><a class="dropdown-item" href="dianm.html">随机点名</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">全部文章</a></li>
+                            <li><a class="dropdown-item" href="ps.html" onclick="filterByTag('图片')">图片处理</a></li>
+                            <li><a class="dropdown-item" href="dianm.html" onclick="filterByTag('点名')">随机点名</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">关于</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">项目</a>
+                        <a class="nav-link" href="#postForm">发表文章</a>
                     </li>
                 </ul>
 
-                <!-- 集成原有搜索功能 -->
-                <div class="d-flex align-items-center">
-                    <div class="input-group me-3 search-box">
-                        <input type="text" 
-                               id="searchInput" 
-                               class="form-control" 
-                               placeholder="搜索文章..."
-                               aria-label="搜索">
-                        <button class="btn btn-outline-primary" 
-                                onclick="searchArticles()">
+                <!-- 搜索和主题切换 -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" 
+                               placeholder="搜索文章..." aria-label="搜索">
+                        <button class="btn btn-outline-primary" onclick="searchArticles()">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                    
-                    <!-- 暗色模式切换 -->
-                    <button class="btn btn-outline-secondary me-3" 
-                            onclick="toggleTheme()">
+                    <button class="btn btn-outline-secondary" onclick="toggleTheme()">
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
@@ -108,8 +146,36 @@
         </div>
     </nav>
 
-    <main class="container mt-5 pt-5">
-        <!-- 文章列表 -->
+    <!-- 发表文章表单 -->
+    <section id="postForm" class="container">
+        <div class="post-form">
+            <h2 class="mb-4">发表新文章</h2>
+            <form onsubmit="return handleSubmit(event)">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="postTitle" 
+                           placeholder="文章标题" required>
+                </div>
+                <div class="mb-3">
+                    <textarea class="form-control" id="postContent" 
+                              rows="6" placeholder="文章内容" required></textarea>
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" 
+                               id="postTags" placeholder="标签（用逗号分隔）">
+                    </div>
+                    <div class="col-md-6">
+                        <input type="url" class="form-control" 
+                               id="postLink" placeholder="相关链接（可选）">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">立即发布</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 文章列表 -->
+    <main id="articleList" class="container">
         <div class="row g-4">
             <div class="col-lg-8">
                 <div id="articleContainer"></div>
@@ -122,29 +188,12 @@
 
             <!-- 侧边栏 -->
             <div class="col-lg-4">
-                <!-- 分类过滤 -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">文章分类</h5>
+                        <h5 class="card-title">热门标签</h5>
                         <div id="tagCloud" class="d-flex flex-wrap gap-2"></div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- 文章详情 -->
-        <div id="articleDetail" class="d-none">
-            <button onclick="closeDetail()" class="btn btn-link mb-3">
-                <i class="fas fa-arrow-left"></i> 返回列表
-            </button>
-            <h2 id="detailTitle"></h2>
-            <div id="detailContent"></div>
-        </div>
-
-        <!-- 评论系统 -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <div id="disqus_thread"></div>
             </div>
         </div>
     </main>
@@ -152,29 +201,21 @@
     <!-- 脚本 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ========== 初始化数据 ==========
+        // 初始化数据
         let currentPage = 1;
         const articlesPerPage = 5;
-        const allArticles = [
+        let allArticles = [
             {
                 id: 1,
-                title: "我是谁",
-                content: "我是酷鱼，自由遨游天地之间...",
-                tags: ["JavaScript"],
-                date: "2025-03-09"
+                title: "欢迎使用技术博客",
+                content: "这是一个演示文章，欢迎发表你自己的技术分享！",
+                tags: ["欢迎"],
+                date: new Date().toLocaleDateString('zh-CN'),
+                link: null
             }
-            {
-                id: 2,
-                title: "Flex布局完全指南",
-                content: "Flexible Box布局是现代Web开发的核心技术...",
-                tags: ["CSS", "布局"],
-                date: "2023-08-01"
-            },
-
-            // 添加更多测试文章...
         ];
 
-        // ========== 主题切换 ==========
+        // 主题切换
         function toggleTheme() {
             const html = document.documentElement;
             const isDark = html.getAttribute('data-bs-theme') === 'dark';
@@ -182,33 +223,63 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
 
-        // ========== 文章渲染 ==========
+        // 发表文章
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const newPost = {
+                id: Date.now(),
+                title: document.getElementById('postTitle').value,
+                content: document.getElementById('postContent').value,
+                tags: document.getElementById('postTags').value.split(',').map(t => t.trim()),
+                date: new Date().toLocaleDateString('zh-CN'),
+                link: document.getElementById('postLink').value || null
+            };
+
+            allArticles.unshift(newPost);
+            renderArticles(1);
+            resetForm();
+            window.location.hash = '#articleList';
+            return false;
+        }
+
+        function resetForm() {
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postContent').value = '';
+            document.getElementById('postTags').value = '';
+            document.getElementById('postLink').value = '';
+        }
+
+        // 渲染文章
         function renderArticles(page, articles = allArticles) {
-            showLoading();
             const start = (page - 1) * articlesPerPage;
             const end = start + articlesPerPage;
             
-            setTimeout(() => {
-                document.getElementById('articleContainer').innerHTML = articles
-                    .slice(start, end)
-                    .map(article => `
-                        <div class="card post-card mb-4" onclick="showDetail(${article.id})">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <small>${article.date}</small>
-                                    <div>${article.tags.map(t => `<span class="badge bg-primary">${t}</span>`).join(' ')}</div>
-                                </div>
-                                <h3 class="h5">${article.title}</h3>
-                                <p>${article.content}</p>
+            document.getElementById('articleContainer').innerHTML = articles
+                .slice(start, end)
+                .map(article => `
+                    <div class="card post-card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <small>${article.date}</small>
+                                <div>${article.tags.map(t => 
+                                    `<span class="badge bg-primary">${t}</span>`
+                                ).join(' ')}</div>
                             </div>
-                        </div>`
-                    ).join('');
-                setupPagination(articles.length);
-                hideLoading();
-            }, 500);
+                            <h3 class="h5">${article.title}</h3>
+                            <p>${article.content}</p>
+                            ${article.link ? 
+                                `<a href="${article.link}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i>相关链接
+                                </a>` : ''}
+                        </div>
+                    </div>`
+                ).join('');
+                
+            setupPagination(articles.length);
         }
 
-        // ========== 分页系统 ==========
+        // 分页功能
         function setupPagination(totalItems) {
             const pageCount = Math.ceil(totalItems / articlesPerPage);
             document.getElementById('pagination').innerHTML = Array(pageCount)
@@ -225,7 +296,7 @@
             renderArticles(page);
         }
 
-        // ========== 搜索功能 ==========
+        // 搜索功能
         function searchArticles() {
             const keyword = document.getElementById('searchInput').value.toLowerCase();
             const results = allArticles.filter(article => 
@@ -236,7 +307,7 @@
             renderArticles(1, results);
         }
 
-        // ========== 分类过滤 ==========
+        // 标签功能
         function initTags() {
             const tags = [...new Set(allArticles.flatMap(a => a.tags))];
             document.getElementById('tagCloud').innerHTML = tags
@@ -254,40 +325,7 @@
             renderArticles(1, filtered);
         }
 
-        // ========== 文章详情 ==========
-        function showDetail(id) {
-            const article = allArticles.find(a => a.id === id);
-            document.getElementById('articleContainer').classList.add('d-none');
-            document.getElementById('articleDetail').classList.remove('d-none');
-            document.getElementById('detailTitle').textContent = article.title;
-            document.getElementById('detailContent').innerHTML = `
-                <p class="text-muted mb-4">${article.date}</p>
-                <div>${article.content}</div>
-            `;
-        }
-
-        function closeDetail() {
-            document.getElementById('articleContainer').classList.remove('d-none');
-            document.getElementById('articleDetail').classList.add('d-none');
-        }
-
-        // ========== 加载控制 ==========
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        // ========== 阅读进度 ==========
-        window.addEventListener('scroll', () => {
-            const scrolled = (window.scrollY / 
-                (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            document.getElementById('readProgress').style.width = `${scrolled}%`;
-        });
-
-        // ========== 初始化 ==========
+        // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.setAttribute(
                 'data-bs-theme', 
@@ -296,14 +334,6 @@
             renderArticles(1);
             initTags();
         });
-
-        // ========== Disqus评论 ==========
-        (function() {
-            const d = document, s = d.createElement('script');
-            s.src = 'https://yzsczx.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-        })();
     </script>
 </body>
 </html>
